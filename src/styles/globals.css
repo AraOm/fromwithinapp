@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fallback; BottomNav overwrites this at runtime */
+:root {
+  --tabbar-h: 64px;
+}
+
+/* Make the whole page fill the screen */
+html,
+body,
+#__next {
+  height: 100%;
+  min-height: 100%;
+}
+
+/* 🔮 Full-page purple gradient background */
+html,
+body {
+  margin: 0;
+  background: radial-gradient(
+      circle at 20% 0%,
+      #f7d9ff 0%,
+      #a64dff 30%,
+      #4a1590 60%,
+      #070017 100%
+  );
+  color: #fdf7ff;
+}
+
+/* Make sure Next root doesn’t override the gradient */
+#__next {
+  background: transparent;
+}
+
+/* Content never hides under the fixed bar */
+.safe-bottom {
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+}
+
+/* 👼 Soft floating glow animation for angel numbers */
+@keyframes float-glow {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translateY(-8px);
+    opacity: 0.8;
+  }
+}
+
+/* Apply the float-glow animation to angel numbers */
+.angel-number-glow {
+  animation: float-glow 4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* ─── Enhanced Angel Badge Glow ───────────────────────────── */
+.aura-angel-badge {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle at center, #000000bb 30%, #00000088 70%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  padding: 0.4rem 1rem;
+  border: 1px solid #ffd700;
+  border-radius: 9999px;
+  box-shadow:
+    0 0 12px rgba(255, 215, 0, 0.9),
+    0 0 24px rgba(255, 215, 0, 0.6),
+    inset 0 0 4px rgba(255, 255, 255, 0.4);
+  animation: angel-glow 3.5s ease-in-out infinite;
+  z-index: 20;
+}
+
+@keyframes angel-glow {
+  0%, 100% {
+    text-shadow:
+      0 0 6px #fff8d6,
+      0 0 14px #ffd700;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    text-shadow:
+      0 0 10px #fff5b5,
+      0 0 25px #ffd700;
+    transform: translateX(-50%) scale(1.05);
+  }
+}

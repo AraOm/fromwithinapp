@@ -1,0 +1,223 @@
+{
+  "polyfillFiles": [
+    "static/chunks/polyfills-42372ed130431b0a.js"
+  ],
+  "devFiles": [],
+  "ampDevFiles": [],
+  "lowPriorityFiles": [
+    "static/9JYmi4jWxKo4nixKDt-1g/_buildManifest.js",
+    "static/9JYmi4jWxKo4nixKDt-1g/_ssgManifest.js"
+  ],
+  "rootMainFiles": [],
+  "pages": {
+    "/": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/index-9b3f192e4cdd763f.js"
+    ],
+    "/404": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/404-f536314c3eb0a59a.js"
+    ],
+    "/_app": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/css/7f1fa95dca15030a.css",
+      "static/chunks/pages/_app-038318250adecae2.js"
+    ],
+    "/_error": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/_error-7a92967bea80186d.js"
+    ],
+    "/aura": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/608-ab5e5c10c69b2f7e.js",
+      "static/chunks/pages/aura-304485dcbb1f309b.js"
+    ],
+    "/aura-gallery": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/608-ab5e5c10c69b2f7e.js",
+      "static/chunks/pages/aura-gallery-4a2662cab26e6b79.js"
+    ],
+    "/calendar": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/calendar-25e4e3057fbf9baa.js"
+    ],
+    "/checkin": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/checkin-61ad433275d5aa20.js"
+    ],
+    "/community": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/community-c3567e5c6f02ed43.js"
+    ],
+    "/crystal-grids": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/187-928dc3737119cd6a.js",
+      "static/chunks/328-c1bd29671142232b.js",
+      "static/chunks/pages/crystal-grids-8b93cedbae73a425.js"
+    ],
+    "/crystal-identifier": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/187-928dc3737119cd6a.js",
+      "static/chunks/pages/crystal-identifier-a65da16fcbb2d11f.js"
+    ],
+    "/energy-calendar": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/energy-calendar-b5219bbb8353f634.js"
+    ],
+    "/energy/month": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/energy/month-6b17944da07eb9c9.js"
+    ],
+    "/energy/personal": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/energy/personal-43ee37d0c856fe45.js"
+    ],
+    "/energy/retrogrades": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/energy/retrogrades-a42b61d660346921.js"
+    ],
+    "/energy/today": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/energy/today-f85e35f3496bb6e2.js"
+    ],
+    "/grids": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/187-928dc3737119cd6a.js",
+      "static/chunks/328-c1bd29671142232b.js",
+      "static/chunks/pages/grids-4d232dd227287148.js"
+    ],
+    "/home": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/home-6eab80ea39fc84d8.js"
+    ],
+    "/insights": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/insights-34059b0bac52a4ce.js"
+    ],
+    "/journal": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/journal-d11faf2234d0471d.js"
+    ],
+    "/learn/[[...segments]]": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/363-b83443a670307d77.js",
+      "static/chunks/pages/learn/[[...segments]]-fa206014d8ab4101.js"
+    ],
+    "/learning": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/363-b83443a670307d77.js",
+      "static/chunks/pages/learning-d204ecc37cea8b2e.js"
+    ],
+    "/mentor": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/mentor-09c640d4eab2e1ca.js"
+    ],
+    "/mentor-test": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/mentor-test-760b8226977be9e0.js"
+    ],
+    "/morning": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/morning-c0fbf9b539cdc215.js"
+    ],
+    "/play": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/play-73e5aacc33276343.js"
+    ],
+    "/practice": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/practice-cfce221f24ff41a2.js"
+    ],
+    "/quests": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/quests-cf60770e4dddbed0.js"
+    ],
+    "/soundscapes": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/soundscapes-058b175410282be3.js"
+    ],
+    "/spiritual-mentor": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/spiritual-mentor-262f82896b17f54b.js"
+    ],
+    "/tarot": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/tarot-41398e1451877d34.js"
+    ],
+    "/welcome": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/welcome-7c7950cc6b4246e1.js"
+    ],
+    "/wellbeing": [
+      "static/chunks/webpack-7da00124a75c8bfd.js",
+      "static/chunks/framework-64ad27b21261a9ce.js",
+      "static/chunks/main-8143a06d03273066.js",
+      "static/chunks/pages/wellbeing-5937758fcce49531.js"
+    ]
+  },
+  "ampFirstPages": []
+}
