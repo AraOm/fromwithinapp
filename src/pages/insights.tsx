@@ -4,7 +4,6 @@ import React, { useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 // icons
 import {
   Activity,
@@ -19,9 +18,9 @@ import {
   HeartPulse,
   Brain,
   Gauge,
-  Search,
-  Check,
 } from "lucide-react";
+
+import { ConnectWearable } from "@/components/ConnectWearable";
 
 /* ----------------------------- Types & Data ----------------------------- */
 
@@ -415,134 +414,6 @@ async function fetchBiometricsDemo(): Promise<Biometrics> {
   };
 }
 
-/* ------------------------ Wearables provider picker ------------------------ */
-
-const WEARABLE_PROVIDERS = [
-  // Ecosystems
-  "Apple Health",
-  "Google Fit",
-  "Samsung Health",
-  // Rings / bands
-  "Oura",
-  "WHOOP",
-  "Fitbit",
-  "Garmin",
-  "Polar",
-  "Coros",
-  "Wahoo",
-  "Biostrap",
-  "Withings",
-  "Amazfit / Zepp",
-  "Xiaomi Mi",
-  "Huawei Health",
-  // Bed & recovery
-  "Eight Sleep",
-  "Emfit QS",
-  // Other biosensors
-  "Muse",
-  "AURA Strap",
-  "Ultrahuman Ring",
-  "Circular Ring",
-  "RingConn",
-  "Movano Evie",
-  "Amazfit Balance",
-];
-
-function WearablePicker({
-  open,
-  onClose,
-  onConnect,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onConnect: (chosen: string[]) => void;
-}) {
-  const [q, setQ] = useState("");
-  const [chosen, setChosen] = useState<string[]>([]);
-
-  const filtered = WEARABLE_PROVIDERS.filter((p) =>
-    p.toLowerCase().includes(q.toLowerCase())
-  );
-
-  const toggle = (p: string) =>
-    setChosen((prev) =>
-      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
-    );
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4">
-      <div className="w-full max-w-xl rounded-3xl border border-slate-800 bg-slate-950/95 p-4 shadow-2xl">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-50">
-            Connect Wearable(s)
-          </h2>
-          <GlowButton
-            size="sm"
-            variant="ghost"
-            onClick={onClose}
-            className="px-3 py-1 text-xs"
-          >
-            Close
-          </GlowButton>
-        </div>
-
-        <div className="mb-3 flex items-center gap-2 rounded-2xl bg-slate-900/80 px-3 py-2">
-          <Search className="h-4 w-4 text-slate-400" />
-          <Input
-            placeholder="Search providers…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="border-none bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus-visible:ring-0"
-          />
-        </div>
-
-        <div className="max-h-[50vh] overflow-auto rounded-2xl border border-slate-800 bg-slate-950/80 p-2">
-          {filtered.length === 0 ? (
-            <p className="p-3 text-sm text-slate-400">No matches.</p>
-          ) : (
-            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {filtered.map((p) => {
-                const active = chosen.includes(p);
-                return (
-                  <li key={p}>
-                    <Pill active={active} onClick={() => toggle(p)}>
-                      <span className="flex items-center gap-1">
-                        <span>{p}</span>
-                        {active && <Check className="h-3 w-3" />}
-                      </span>
-                    </Pill>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-
-        <div className="mt-3 flex items-center justify-end gap-2">
-          <GlowButton
-            size="sm"
-            variant="outline"
-            onClick={onClose}
-            className="px-4 py-1.5"
-          >
-            Cancel
-          </GlowButton>
-          <GlowButton
-            size="sm"
-            onClick={() => onConnect(chosen)}
-            disabled={chosen.length === 0}
-            className="px-4 py-1.5 disabled:opacity-50"
-          >
-            Connect {chosen.length > 0 ? `(${chosen.length})` : ""}
-          </GlowButton>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* --------------------------------- Page --------------------------------- */
 
 export default function InsightsPage() {
@@ -556,9 +427,6 @@ export default function InsightsPage() {
   const [autoChakra, setAutoChakra] = useState<Chakra | null>(null);
   const [useAuto, setUseAuto] = useState(true);
   const [loadingBio, setLoadingBio] = useState(false);
-
-  // Picker modal
-  const [pickerOpen, setPickerOpen] = useState(false);
 
   // Plan
   const [plan, setPlan] = useState<PlanDay[] | null>(null);
@@ -647,11 +515,8 @@ export default function InsightsPage() {
     );
   };
 
-  // Connect via picker
-  const handleConnect = async (chosen: string[]) => {
-    setPickerOpen(false);
-    if (!chosen.length) return;
-    setProviders(chosen);
+  // Sample/demo connection (while real wearables are being wired up)
+  const handleSampleData = async () => {
     setLoadingBio(true);
     try {
       const data = await fetchBiometricsDemo();
@@ -659,6 +524,7 @@ export default function InsightsPage() {
       const { top } = scoreChakrasFromBiometrics(data);
       setAutoChakra(top);
       setConnected(true);
+      setProviders(["Sample data"]);
     } finally {
       setLoadingBio(false);
     }
@@ -726,17 +592,25 @@ export default function InsightsPage() {
                 <>
                   <p className="text-sm text-slate-300">
                     Connect a wearable to auto-detect today’s focus chakra and
-                    get instant guidance.
+                    get instant guidance. Or preview how it works with sample
+                    biometric data.
                   </p>
-                  <GlowButton onClick={() => setPickerOpen(true)}>
-                    <Watch className="mr-1 h-4 w-4" />
-                    Connect Wearable(s)
-                  </GlowButton>
-                  <WearablePicker
-                    open={pickerOpen}
-                    onClose={() => setPickerOpen(false)}
-                    onConnect={handleConnect}
-                  />
+
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                    {/* Real connection (OAuth via ConnectWearable) */}
+                    <div className="flex-1">
+                      <ConnectWearable />
+                    </div>
+
+                    {/* Sample/demo data */}
+                    <GlowButton
+                      onClick={handleSampleData}
+                      className="w-full sm:w-auto"
+                    >
+                      <Sparkles className="mr-1 h-4 w-4" />
+                      Try with sample data
+                    </GlowButton>
+                  </div>
                 </>
               ) : (
                 <>
@@ -1069,3 +943,4 @@ export default function InsightsPage() {
     </div>
   );
 }
+
