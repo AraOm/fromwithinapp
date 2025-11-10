@@ -1,6 +1,7 @@
 // src/pages/index.tsx
 import React, { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { AuthButtons } from "@/components/AuthButtons";
 
@@ -99,7 +100,6 @@ export default function HomePage() {
   const handleResetOrientation = () => {
     if (typeof window === "undefined") return;
     window.localStorage.removeItem(ONBOARD_KEY);
-    // optionally also reset trial/plan/etc if you decide later
     router.replace("/welcome");
   };
 
@@ -116,7 +116,17 @@ export default function HomePage() {
         <div className="w-full max-w-4xl rounded-[32px] border border-slate-800 bg-slate-950/80 p-6 shadow-[0_26px_80px_rgba(0,0,0,0.8)] backdrop-blur md:p-8">
           {/* Logo + title */}
           <div className="flex flex-col items-center gap-1 pb-6">
-            <div className="text-2xl text-slate-100">            </div>
+            {/* Icon above title */}
+            <div className="mb-2 flex items-center justify-center">
+              <Image
+                src="/fw-icon.png" // ✅ Corrected path
+                alt="From Within icon"
+                width={90}
+                height={90}
+                className="rounded-2xl shadow-[0_0_50px_0_rgba(236,72,153,0.65)]"
+              />
+            </div>
+
             <h1 className="text-3xl font-semibold text-slate-50 md:text-4xl">
               From Within
             </h1>
@@ -145,28 +155,27 @@ export default function HomePage() {
           </div>
 
           {/* Orientation controls */}
-<div className="mb-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-  {/* New here link */}
-  <Link
-    href="/welcome"
-    className="inline-flex items-center gap-2 rounded-full border border-sky-400/70 bg-sky-500/10 px-4 py-2 text-xs font-semibold text-sky-100 shadow-sm shadow-sky-500/30 hover:bg-sky-500/20 hover:text-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-  >
-    <span className="uppercase tracking-[0.18em] text-[10px] text-sky-200">
-      New here
-    </span>
-    <span>Start with a gentle orientation →</span>
-  </Link>
+          <div className="mb-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+            {/* New here link */}
+            <Link
+              href="/welcome"
+              className="inline-flex items-center gap-2 rounded-full border border-sky-400/70 bg-sky-500/10 px-4 py-2 text-xs font-semibold text-sky-100 shadow-sm shadow-sky-500/30 hover:bg-sky-500/20 hover:text-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+            >
+              <span className="uppercase tracking-[0.18em] text-[10px] text-sky-200">
+                New here
+              </span>
+              <span>Start with a gentle orientation →</span>
+            </Link>
 
-  {/* Reset orientation button */}
-  <button
-    type="button"
-    onClick={handleResetOrientation}
-    className="text-[11px] text-slate-200 underline-offset-4 hover:text-slate-50 hover:underline"
-  >
-    Reset orientation (clear my intro answers)
-  </button>
-</div>
-
+            {/* Reset orientation button */}
+            <button
+              type="button"
+              onClick={handleResetOrientation}
+              className="text-[11px] text-slate-200 underline-offset-4 hover:text-slate-50 hover:underline"
+            >
+              Reset orientation (clear my intro answers)
+            </button>
+          </div>
 
           {/* Tiles grid */}
           <section className="grid gap-4 sm:grid-cols-2">
