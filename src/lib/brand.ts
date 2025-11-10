@@ -1,5 +1,5 @@
 export const APP_NAME = "From Within";
-export const BRAND_MARK = "☥"; // ankh
+export const BRAND_MARK = "𓀤"; // ankh
 export const BRAND_TITLE = `${APP_NAME} ${BRAND_MARK}`;
 
 export const TAGLINE =

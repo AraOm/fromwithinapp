@@ -1,1 +1,0 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[79],{131:function(n,u,_){(window.__NEXT_P=window.__NEXT_P||[]).push(["/grids",function(){return _(6244)}])},6244:function(n,u,_){"use strict";_.r(u);var t=_(5893);_(7294);var i=_(1328);u.default=()=>(0,t.jsx)(i.Z,{})}},function(n){n.O(0,[187,328,888,774,179],function(){return n(n.s=131)}),_N_E=n.O()}]);

@@ -1,1 +1,0 @@
-(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[524],{1282:function(n,u,_){(window.__NEXT_P=window.__NEXT_P||[]).push(["/crystal-grids",function(){return _(8463)}])},8463:function(n,u,_){"use strict";_.r(u);var t=_(5893);_(7294);var r=_(1328);u.default=()=>(0,t.jsx)(r.Z,{})}},function(n){n.O(0,[187,328,888,774,179],function(){return n(n.s=1282)}),_N_E=n.O()}]);

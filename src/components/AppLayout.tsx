@@ -18,7 +18,7 @@ export default function AppLayout({ children }: Props) {
             >
               <span className="font-canto">From&nbsp;Within</span>
               <span className="ankh" aria-hidden>
-                ☥
+              𓀤
               </span>
             </Link>
           </div>

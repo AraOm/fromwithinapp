@@ -116,7 +116,7 @@ export default function HomePage() {
         <div className="w-full max-w-4xl rounded-[32px] border border-slate-800 bg-slate-950/80 p-6 shadow-[0_26px_80px_rgba(0,0,0,0.8)] backdrop-blur md:p-8">
           {/* Logo + title */}
           <div className="flex flex-col items-center gap-1 pb-6">
-            <div className="text-2xl text-slate-100">☥</div>
+            <div className="text-2xl text-slate-100">𓀤            </div>
             <h1 className="text-3xl font-semibold text-slate-50 md:text-4xl">
               From Within
             </h1>

@@ -23,7 +23,7 @@ export default function WelcomePage() {
       <div className="mx-auto flex max-w-lg flex-col gap-6 px-4 pb-16 pt-10 md:pt-16">
         {/* Header */}
         <header className="text-center">
-          <div className="text-3xl text-slate-100">☥</div>
+          <div className="text-3xl text-slate-100">𓀤</div>
           <h1 className="mt-2 text-2xl font-semibold text-slate-50 md:text-3xl">
             Welcome to From Within
           </h1>
