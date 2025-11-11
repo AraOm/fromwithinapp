@@ -1,5 +1,5 @@
 // src/pages/welcome.tsx
-import React, { useState } from "react";
+import React, { use State } from "react";
 import { useRouter } from "next/router";
 
 const ONBOARD_KEY = "gw_has_onboarded";
@@ -15,7 +15,8 @@ export default function WelcomePage() {
       window.localStorage.setItem("gw_mode", mode);
       window.localStorage.setItem("gw_morning_time", morningTime);
     }
-    router.replace("/morning");
+    // ⬇️ CHANGE IS HERE: go to home instead of /morning
+    router.replace("/");
   };
 
   return (
