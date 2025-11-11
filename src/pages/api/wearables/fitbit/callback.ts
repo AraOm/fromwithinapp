@@ -1,7 +1,8 @@
 // src/pages/api/wearables/fitbit/callback.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
+const BETA_USER_ID = "7b9710c3-6cf0-40e4-86be-35836e042df2";
 
 export default async function handler(
   req: NextApiRequest,
@@ -29,6 +30,7 @@ export default async function handler(
   }
 
   if (!clientId || !clientSecret) {
+    console.error("Missing Fitbit env vars");
     return res
       .status(500)
       .json({ error: "Missing FITBIT_CLIENT_ID or FITBIT_CLIENT_SECRET" });
@@ -81,28 +83,15 @@ export default async function handler(
 
   const { access_token, refresh_token, expires_in, scope } = tokenJson;
 
-  // Look up the current Supabase user
-  const supabase = createServerSupabaseClient({ req, res });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return res.redirect(
-      "/insights?wearable=fitbit&status=error&reason=no_user"
-    );
-  }
-
   const expiresAt = expires_in
     ? new Date(Date.now() + expires_in * 1000).toISOString()
     : null;
 
-  // Store in wearable_connections (provider = 'fitbit')
   const { error: dbError } = await supabaseAdmin
     .from("wearable_connections")
     .upsert(
       {
-        user_id: user.id,
+        user_id: BETA_USER_ID,
         provider: "fitbit",
         access_token,
         refresh_token: refresh_token ?? null,
@@ -120,6 +109,5 @@ export default async function handler(
     );
   }
 
-  // Back to your app
   return res.redirect("/insights?wearable=fitbit&status=connected");
 }

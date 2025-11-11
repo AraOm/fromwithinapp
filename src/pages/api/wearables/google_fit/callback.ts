@@ -1,7 +1,8 @@
 // src/pages/api/wearables/google_fit/callback.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
+const BETA_USER_ID = "7b9710c3-6cf0-40e4-86be-35836e042df2";
 
 export default async function handler(
   req: NextApiRequest,
@@ -29,6 +30,7 @@ export default async function handler(
   }
 
   if (!clientId || !clientSecret) {
+    console.error("Missing Google Fit env vars");
     return res
       .status(500)
       .json({ error: "Missing Google Fit client env vars" });
@@ -77,29 +79,16 @@ export default async function handler(
 
   const { access_token, refresh_token, expires_in, scope } = tokenJson;
 
-  // Look up current Supabase user
-  const supabase = createServerSupabaseClient({ req, res });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return res.redirect(
-      "/insights?wearable=google_fit&status=error&reason=no_user"
-    );
-  }
-
   const expiresAt = expires_in
     ? new Date(Date.now() + expires_in * 1000).toISOString()
     : null;
 
-  // Save into wearable_connections
   const { error: dbError } = await supabaseAdmin
     .from("wearable_connections")
     .upsert(
       {
-        user_id: user.id,
-        provider: "google_fit", // must match your enum value
+        user_id: BETA_USER_ID,
+        provider: "google_fit",
         access_token,
         refresh_token: refresh_token ?? null,
         expires_at: expiresAt,

@@ -1,6 +1,5 @@
 // src/pages/api/wearables/fitbit/auth.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,17 +8,6 @@ export default async function handler(
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const supabase = createServerSupabaseClient({ req, res });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Require login
-  if (!user) {
-    // tweak this to your auth route if needed
-    return res.redirect("/?auth=required");
   }
 
   const clientId = process.env.FITBIT_CLIENT_ID;

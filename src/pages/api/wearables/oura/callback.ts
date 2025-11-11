@@ -1,7 +1,8 @@
 // src/pages/api/wearables/oura/callback.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
+const BETA_USER_ID = "7b9710c3-6cf0-40e4-86be-35836e042df2";
 
 type OuraTokenResponse = {
   access_token: string;
@@ -37,6 +38,7 @@ export default async function handler(
   }
 
   if (!clientId || !clientSecret) {
+    console.error("Missing Oura env vars");
     return res
       .status(500)
       .json({ error: "Missing OURA_CLIENT_ID or OURA_CLIENT_SECRET" });
@@ -44,7 +46,6 @@ export default async function handler(
 
   const redirectUri = `${appUrl}/api/wearables/oura/callback`;
 
-  // Exchange authorization code for access + refresh tokens
   const tokenParams = new URLSearchParams({
     grant_type: "authorization_code",
     code,
@@ -80,30 +81,16 @@ export default async function handler(
   const tokenJson = (await tokenResponse.json()) as OuraTokenResponse;
   const { access_token, refresh_token, expires_in, scope } = tokenJson;
 
-  // Get current user from Supabase
-  const supabase = createServerSupabaseClient({ req, res });
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return res.redirect(
-      "/insights?wearable=oura&status=error&reason=no_user"
-    );
-  }
-
-  // Compute expiry timestamp if expires_in provided
   const expiresAt = expires_in
     ? new Date(Date.now() + expires_in * 1000).toISOString()
     : null;
 
-  // Save / update wearable connection for this user + provider
   const { error: dbError } = await supabaseAdmin
     .from("wearable_connections")
     .upsert(
       {
-        user_id: user.id,
-        provider: "oura", // must match enum value in wearable_provider
+        user_id: BETA_USER_ID,
+        provider: "oura",
         access_token,
         refresh_token: refresh_token ?? null,
         expires_at: expiresAt,
@@ -120,6 +107,5 @@ export default async function handler(
     );
   }
 
-  // Success → back to Insights
   return res.redirect("/insights?wearable=oura&status=connected");
 }
