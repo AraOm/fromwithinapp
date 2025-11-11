@@ -73,7 +73,7 @@ export default function HomePage() {
     },
   ];
 
-  // Smart redirect logic: onboarding + morning ritual
+  // Smart redirect logic: onboarding only (no auto-morning redirect for beta)
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -85,16 +85,9 @@ export default function HomePage() {
       return;
     }
 
-    // 2) Returning user: check if we should nudge into Morning ritual
-    const now = new Date();
-    const hour = now.getHours();
-    const todayStr = now.toISOString().slice(0, 10);
-    const lastSeen = window.localStorage.getItem(MORNING_SEEN_KEY);
-    const isMorning = hour >= MORNING_START_HOUR && hour < MORNING_END_HOUR;
-
-    if (isMorning && lastSeen !== todayStr) {
-      router.replace("/morning");
-    }
+    // 2) For beta, DO NOT auto-redirect to /morning.
+    // Users will tap the Morning tile themselves from home.
+    // (Leaving constants in place so we can re-enable later if we want.)
   }, [router]);
 
   const handleResetOrientation = () => {
