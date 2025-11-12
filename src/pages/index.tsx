@@ -9,7 +9,7 @@ import { AuthButtons } from "@/components/AuthButtons";
 const ONBOARD_KEY = "gw_has_onboarded";
 const MORNING_SEEN_KEY = "gw_morning_seen_date";
 
-// Morning window (local time)
+// Morning window (local time) – kept for future nudges
 const MORNING_START_HOUR = 4; // 4 AM
 const MORNING_END_HOUR = 11;  // 11 AM (non-inclusive)
 
@@ -73,21 +73,15 @@ export default function HomePage() {
     },
   ];
 
-  // Smart redirect logic: onboarding only (no auto-morning redirect for beta)
+  // Onboarding redirect ONLY – no auto-morning redirect for beta
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const hasOnboarded = window.localStorage.getItem(ONBOARD_KEY) === "true";
 
-    // 1) New user → Welcome page
     if (!hasOnboarded) {
       router.replace("/welcome");
-      return;
     }
-
-    // 2) For beta, DO NOT auto-redirect to /morning.
-    // Users will tap the Morning tile themselves from home.
-    // (Leaving constants in place so we can re-enable later if we want.)
   }, [router]);
 
   const handleResetOrientation = () => {
@@ -112,7 +106,7 @@ export default function HomePage() {
             {/* Icon above title */}
             <div className="mb-2 flex items-center justify-center">
               <Image
-                src="/fw-icon.png" // ✅ Corrected path
+                src="/fw-icon.png"
                 alt="From Within icon"
                 width={90}
                 height={90}
@@ -130,16 +124,12 @@ export default function HomePage() {
 
           {/* Aura rectangle with soft glowing vertical oval */}
           <div className="mb-4 w-full">
-            {/* outer border gradient */}
             <div className="relative rounded-[2.5rem] bg-[conic-gradient(from_160deg_at_10%_0%,#7dd3fc,#f9a8d4,#a855f7,#7dd3fc)] p-[2px] shadow-[0_30px_80px_rgba(6,0,40,0.9)]">
-              {/* inner panel with deep cosmic background */}
               <div className="relative overflow-hidden rounded-[2.3rem] bg-[radial-gradient(circle_at_0%_0%,#1e293b_0%,#020617_70%)]">
-                {/* vertical glowing aura oval */}
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                   <div className="h-72 w-40 rounded-full bg-[radial-gradient(circle_at_center,#ffe082_0%,#fb8ac0_30%,#7dd3fc_65%,transparent_100%)] opacity-95 blur-[36px] sm:h-80 sm:w-52" />
                 </div>
 
-                {/* text over aura */}
                 <p className="relative z-10 px-6 py-10 text-center text-sm font-medium text-slate-50 md:px-10 md:py-14 md:text-lg">
                   Your home base. Choose the path you&apos;d like to explore.
                 </p>
@@ -147,26 +137,14 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Orientation controls */}
-          <div className="mb-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-            {/* New here link */}
-            <Link
-              href="/welcome"
-              className="inline-flex items-center gap-2 rounded-full border border-sky-400/70 bg-sky-500/10 px-4 py-2 text-xs font-semibold text-sky-100 shadow-sm shadow-sky-500/30 hover:bg-sky-500/20 hover:text-sky-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/80 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-            >
-              <span className="uppercase tracking-[0.18em] text-[10px] text-sky-200">
-                New here
-              </span>
-              <span>Start with a gentle orientation →</span>
-            </Link>
-
-            {/* Reset orientation button */}
+          {/* Subtle orientation control (for you / power users) */}
+          <div className="mb-6 flex w-full justify-end">
             <button
               type="button"
               onClick={handleResetOrientation}
-              className="text-[11px] text-slate-200 underline-offset-4 hover:text-slate-50 hover:underline"
+              className="text-[11px] text-slate-300 underline-offset-4 hover:text-slate-50 hover:underline"
             >
-              Reset orientation (clear my intro answers)
+              Reset intro & guidance
             </button>
           </div>
 
@@ -185,7 +163,9 @@ export default function HomePage() {
                 <div className="relative z-10 mb-3 flex items-start gap-3">
                   {/* icon bubble */}
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-400 via-violet-400 to-sky-400 text-base shadow-lg shadow-fuchsia-500/40">
-                    <span className="leading-none text-slate-950">{icon}</span>
+                    <span className="leading-none text-slate-950">
+                      {icon}
+                    </span>
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-slate-50">

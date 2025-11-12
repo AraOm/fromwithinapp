@@ -1,5 +1,5 @@
 // src/pages/welcome.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 const ONBOARD_KEY = "gw_has_onboarded";
@@ -9,13 +9,22 @@ export default function WelcomePage() {
   const [mode, setMode] = useState<"gentle" | "deep" | "track">("gentle");
   const [morningTime, setMorningTime] = useState("07:30");
 
+  // 🧠 If someone manually hits /welcome *after* onboarding, gently send them home.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hasOnboarded = window.localStorage.getItem(ONBOARD_KEY) === "true";
+    if (hasOnboarded) {
+      router.replace("/");
+    }
+  }, [router]);
+
   const handleBegin = () => {
     if (typeof window !== "undefined") {
       window.localStorage.setItem(ONBOARD_KEY, "true");
       window.localStorage.setItem("gw_mode", mode);
       window.localStorage.setItem("gw_morning_time", morningTime);
     }
-    // ⬇️ IMPORTANT: go to HOME, not /morning
+    // ➜ First stop after setup is always HOME
     router.replace("/");
   };
 
