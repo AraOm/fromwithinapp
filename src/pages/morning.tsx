@@ -1,5 +1,6 @@
 // src/pages/morning.tsx
 "use client";
+import { ConnectWearable } from "@/components/ConnectWearable";
 
 import React, { useMemo, useState, useEffect } from "react";
 import {
@@ -680,7 +681,7 @@ export default function MorningPage() {
           </div>
         </header>
 
-        {/* Sleep metrics + connect wearable (demo) */}
+        {/* Sleep metrics + connect wearable */}
         <section className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 p-5 shadow-xl shadow-slate-950/70">
           <div className="pointer-events-none absolute -left-20 top-0 h-40 w-40 rounded-full bg-fuchsia-500/15 blur-3xl" />
           <div className="pointer-events-none absolute -right-10 bottom-0 h-44 w-44 rounded-full bg-emerald-500/10 blur-3xl" />
@@ -695,18 +696,11 @@ export default function MorningPage() {
               </div>
               <MetricRow sleep={sleep} />
             </div>
-            <button
-              className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-fuchsia-400 via-violet-400 to-sky-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-md shadow-fuchsia-500/40 transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-sky-400/80 focus:ring-offset-2 focus:ring-offset-slate-950"
-              title="Connect a wearable"
-              onClick={() => {
-                alert(
-                  "Wearables menu:\n• Apple Watch\n• Oura Ring\n• WHOOP\n• Garmin\n• Fitbit\n• Polar\n• Withings\n• Google Pixel Watch\n• Samsung Galaxy Watch"
-                );
-              }}
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              Connect wearable (demo)
-            </button>
+
+            {/* Connect wearable dialog button */}
+            <div className="flex items-start">
+              <ConnectWearable />
+            </div>
           </div>
 
           <p className="relative z-10 mt-3 flex items-center gap-1 text-[11px] text-slate-400">
