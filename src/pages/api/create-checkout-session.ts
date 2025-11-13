@@ -1,3 +1,4 @@
+// src/pages/api/create-checkout-session.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 
@@ -5,64 +6,65 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: "2024-06-20",
 });
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+type Data = { url: string } | { error: string };
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Data>
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { plan } = req.body || {};
+
+  // Decide which Stripe price + mode to use
+  let priceId: string | undefined;
+  let mode: "subscription" | "payment" = "subscription";
+
+  if (plan === "golden") {
+    priceId = process.env.NEXT_PUBLIC_PRICE_GOLDEN;
+    mode = "subscription";
+  } else if (plan === "infinity") {
+    priceId = process.env.NEXT_PUBLIC_PRICE_INFINITY;
+    mode = "payment";
+  }
+
+  if (!priceId) {
+    console.error("Missing or invalid plan/priceId", { plan, priceId });
+    return res.status(400).json({ error: "Invalid plan or missing price id" });
+  }
+
+  const successUrl =
+    process.env.NEXT_PUBLIC_SUCCESS_URL ||
+    "http://localhost:3000/checkout/success";
+  const cancelUrl =
+    process.env.NEXT_PUBLIC_CANCEL_URL ||
+    "http://localhost:3000/checkout/cancel";
 
   try {
-    const { plan, userId, email } = req.body as {
-      plan: "golden" | "infinity"; // "golden" = $11.11/mo, "infinity" = $333 one-time
-      userId?: string;
-      email?: string;
-    };
-
-    const successUrl = process.env.NEXT_PUBLIC_SUCCESS_URL as string;
-    const cancelUrl = process.env.NEXT_PUBLIC_CANCEL_URL as string;
-
-    if (plan === "golden") {
-      const priceId = process.env.NEXT_PUBLIC_PRICE_GOLDEN;
-      if (!priceId) return res.status(400).json({ error: "Missing subscription price id" });
-
-      const session = await stripe.checkout.sessions.create({
-        mode: "subscription",
-        billing_address_collection: "auto",
-        allow_promotion_codes: true,
-        customer_creation: "if_required",
-        customer_email: email,
-        success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: cancelUrl,
-        line_items: [{ price: priceId, quantity: 1 }],
-        // 7-day trial lives on the Price; we just tag metadata here
-        subscription_data: {
-          metadata: { appUserId: userId ?? "", plan: "golden" },
+    const session = await stripe.checkout.sessions.create({
+      mode,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
         },
-        metadata: { appUserId: userId ?? "", plan: "golden" },
-      });
+      ],
+      allow_promotion_codes: true,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    });
 
-      return res.status(200).json({ url: session.url });
-    }
-
-    if (plan === "infinity") {
-      const priceId = process.env.NEXT_PUBLIC_PRICE_INFINITY;
-      if (!priceId) return res.status(400).json({ error: "Missing lifetime price id" });
-
-      const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-        billing_address_collection: "auto",
-        allow_promotion_codes: true,
-        customer_creation: "if_required",
-        customer_email: email,
-        success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: cancelUrl,
-        line_items: [{ price: priceId, quantity: 1 }],
-        metadata: { appUserId: userId ?? "", plan: "infinity" },
-      });
-
-      return res.status(200).json({ url: session.url });
-    }
-
-    return res.status(400).json({ error: "Unknown plan" });
+    return res.status(200).json({ url: session.url ?? "" });
   } catch (err: any) {
-    console.error(err);
-    return res.status(500).json({ error: err.message });
+    console.error("Stripe checkout error:", {
+      message: err?.message,
+      type: err?.type,
+      code: err?.code,
+    });
+    return res
+      .status(500)
+      .json({ error: err?.message || "Stripe checkout error" });
   }
 }

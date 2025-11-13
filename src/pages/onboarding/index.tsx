@@ -44,9 +44,9 @@ export default function Onboarding() {
           From Within fuses intelligent technology with intuitive wisdom —
           aligning your energy, emotions, and purpose.
           <br /><br />
-          The ultimate guide isn’t an app.
+          
           <br />
-          It’s you — awakened from within. 🌙
+         Awaken from within. 🌙
         </p>
 
         {/* Wearable choices */}
