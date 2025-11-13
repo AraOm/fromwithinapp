@@ -58,10 +58,15 @@ export const ConnectWearable: React.FC = () => {
   const [isOpening, setIsOpening] = useState<ProviderKey | null>(null);
 
   const handleConnect = (provider: ProviderKey, available: boolean) => {
-    if (!available) return;
-
+    if (!available) {
+      alert(
+        "Apple Health / Apple Watch syncing is coming in a later update.\n\nFor now, you can connect Fitbit, Oura, or Google Fit."
+      );
+      return;
+    }
+  
     setIsOpening(provider);
-
+  
     if (provider === "fitbit") {
       window.location.href = "/api/wearables/fitbit/auth";
     } else if (provider === "oura") {
@@ -70,7 +75,7 @@ export const ConnectWearable: React.FC = () => {
       window.location.href = "/api/wearables/google_fit/auth";
     }
     // apple_health will be handled by the native iOS app later
-  };
+  };  
 
   const openingLabel =
     isOpening === "fitbit"

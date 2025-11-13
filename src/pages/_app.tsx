@@ -43,7 +43,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
               href="mailto:fromwithinapp@gmail.com"
               className="underline decoration-sky-400/80 underline-offset-2"
             >
-              fromwithinapp@gmail.com
+              hello@fromwithin.com
             </a>
             .
           </p>

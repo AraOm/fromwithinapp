@@ -1,39 +1,22 @@
+// src/pages/home.tsx
 import React, { useEffect, useMemo, useState } from "react";
 
-// ---- storage keys ----
-const WEARABLE_KEY = "gw_wearable";
-const SLEEP_KEY = "gw_sleep";
-
-// ---- available wearables ----
-const WEARABLES = [
-  "Apple Watch (Apple Health)",
-  "Fitbit",
-  "Oura Ring",
-  "WHOOP",
-  "Garmin",
-  "Samsung Galaxy Watch (Samsung Health)",
-  "Google Fit",
-  "Polar",
-  "Withings",
-  "Amazfit",
-  "Suunto",
-  "Coros",
-];
-
-// ---- Types ----
+// --- Types ---
 type SleepData = {
-  score: number; // 0–100
-  hours: number; // e.g. 6.8
-  source?: string; // wearable/provider name or "Manual"
-  updatedAt: number;
+  score: number;      // 0–100
+  hours: number;      // e.g. 6.8
+  source?: string;    // provider name
+  updatedAt: number;  // ms
 };
 
-// ---- Helpers ----
+type SubscriptionStatus = "trialing" | "active" | "canceled" | "incomplete";
+
+// --- Helpers ---
 function clamp(n: number, min = 0, max = 100) {
   return Math.max(min, Math.min(max, n));
 }
 
-// ---- Recommendation Logic ----
+// --- Recommendation Logic (unchanged) ---
 function getPlan(sleep: SleepData | null) {
   const score = sleep?.score ?? 70;
 
@@ -50,7 +33,6 @@ function getPlan(sleep: SleepData | null) {
         "12–16 oz water on rising; then lemon water. Optional: light green tea.",
       meditation:
         "5 min gratitude breath: inhale ‘thank you’, exhale ‘I am supported’.",
-      // dark-theme accent
       color: "border-emerald-400/50 bg-emerald-500/10",
       statusChip: "bg-emerald-500/20 text-emerald-100 border-emerald-400/40",
     };
@@ -102,7 +84,7 @@ function getPlan(sleep: SleepData | null) {
   };
 }
 
-// ---- Small card component ----
+// --- Small UI bits ---
 function Card({ title, text }: { title: string; text: string }) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-950/85 p-4 shadow-sm shadow-slate-900/60">
@@ -114,50 +96,60 @@ function Card({ title, text }: { title: string; text: string }) {
   );
 }
 
-// ---- Page ----
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+      {children}
+    </span>
+  );
+}
+
+// --- Page ---
 export default function HomePage() {
-  const [wearable, setWearable] = useState<string | null>(null);
-  const [showPair, setShowPair] = useState(false);
-
+  // In the real app these come from your API (Supabase/Edge Function).
   const [sleep, setSleep] = useState<SleepData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [wearableHealthy, setWearableHealthy] = useState(true); // flips to false if token refresh fails
+  const [subStatus, setSubStatus] = useState<SubscriptionStatus>("active");
+  const [trialEndDate, setTrialEndDate] = useState<string | null>(null);
 
-  // Manual modal
-  const [showManual, setShowManual] = useState(false);
-  const [manualScore, setManualScore] = useState(70);
-  const [manualHours, setManualHours] = useState(7);
-
-  // Load from localStorage
+  // Fake fetch to simulate live data (replace with real fetch)
   useEffect(() => {
-    try {
-      const w = localStorage.getItem(WEARABLE_KEY);
-      if (w) setWearable(w);
-      const s = localStorage.getItem(SLEEP_KEY);
-      if (s) setSleep(JSON.parse(s));
-    } catch {
-      // ignore
+    let canceled = false;
+    async function load() {
+      setLoading(true);
+      try {
+        // Example: const res = await fetch("/api/me/sleep"); const json = await res.json();
+        // Simulate a score/hours
+        const score = clamp(Math.round(60 + Math.random() * 35));
+        const hours = Math.round((5 + Math.random() * 3.5) * 10) / 10;
+
+        if (!canceled) {
+          setSleep({
+            score,
+            hours,
+            source: "Oura", // replace with user.profile.wearable_provider
+            updatedAt: Date.now(),
+          });
+
+          // Simulate subscription
+          // setSubStatus("trialing"); // uncomment to preview trial chip
+          // setTrialEndDate("Nov 19, 2025");
+        }
+      } catch (_) {
+        if (!canceled) {
+          // If your token refresh fails, flip the banner
+          setWearableHealthy(false);
+        }
+      } finally {
+        if (!canceled) setLoading(false);
+      }
     }
+    load();
+    return () => {
+      canceled = true;
+    };
   }, []);
-
-  // Persist
-  useEffect(() => {
-    if (sleep) localStorage.setItem(SLEEP_KEY, JSON.stringify(sleep));
-  }, [sleep]);
-
-  useEffect(() => {
-    if (wearable) localStorage.setItem(WEARABLE_KEY, wearable);
-  }, [wearable]);
-
-  // Simulated fetch from wearable (until real API is wired)
-  const fetchFromWearable = () => {
-    const score = clamp(Math.round(60 + Math.random() * 35));
-    const hours = Math.round((5 + Math.random() * 3.5) * 10) / 10; // 5–8.5h
-    setSleep({
-      score,
-      hours,
-      source: wearable || undefined,
-      updatedAt: Date.now(),
-    });
-  };
 
   const plan = useMemo(() => getPlan(sleep), [sleep]);
 
@@ -166,7 +158,20 @@ export default function HomePage() {
       <h1 className="sr-only">Home</h1>
 
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 pb-20 pt-8 md:px-8">
-        {/* Header */}
+        {/* Optional banners */}
+        {!wearableHealthy && (
+          <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-100">
+            We lost connection to your wearable.{" "}
+            <button
+              className="underline decoration-amber-300/70 underline-offset-2"
+              onClick={() => (window.location.href = "/onboarding?reconnect=1")}
+            >
+              Reconnect now
+            </button>
+            .
+          </div>
+        )}
+
         <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
@@ -176,19 +181,25 @@ export default function HomePage() {
               From Within · Morning
             </h2>
             <p className="mt-2 max-w-xl text-sm text-slate-300">
-              Your rest sets the tone. We read your sleep (or manual check-in)
-              and weave a tiny ritual: stretches, breakfast, drinks, and
-              meditation tuned to your current energy.
+              Your rest sets the tone. We read your sleep and weave a tiny
+              ritual: stretches, breakfast, drinks, and meditation tuned to your energy.
             </p>
           </div>
 
-          <div className="mt-1 text-right md:mt-0">
+          <div className="mt-1 text-right md:mt-0 space-y-2">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
               From Within
             </p>
             <p className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-sky-300 bg-clip-text text-sm font-semibold text-transparent">
               Rest · Rhythm · Ritual
             </p>
+
+            {/* Trial chip (only show when trialing) */}
+            {subStatus === "trialing" && (
+              <Chip>
+                {trialEndDate ? `Trial · Renews ${trialEndDate}` : "Trial · 7 days"}
+              </Chip>
+            )}
           </div>
         </header>
 
@@ -203,7 +214,7 @@ export default function HomePage() {
                 Sleep Score
               </div>
               <div className="mt-1 text-3xl font-semibold">
-                {sleep ? sleep.score : "—"}
+                {loading ? "…" : sleep ? sleep.score : "—"}
               </div>
               <p className="mt-1 text-xs text-slate-400">
                 0–100 snapshot of how your body recovered.
@@ -215,7 +226,7 @@ export default function HomePage() {
                 Hours Slept
               </div>
               <div className="mt-1 text-3xl font-semibold">
-                {sleep ? sleep.hours : "—"}
+                {loading ? "…" : sleep ? sleep.hours : "—"}
               </div>
               <p className="mt-1 text-xs text-slate-400">
                 Not about perfection—just honest data to work with.
@@ -227,51 +238,13 @@ export default function HomePage() {
                 Source
               </div>
               <div className="mt-1 text-sm font-medium text-slate-100">
-                {sleep?.source || (wearable ? wearable : "Not paired")}
+                {loading ? "…" : sleep?.source || "—"}
               </div>
               {sleep?.updatedAt && (
                 <div className="mt-1 text-xs text-slate-500">
                   updated {new Date(sleep.updatedAt).toLocaleTimeString()}
                 </div>
               )}
-              {!sleep && (
-                <p className="mt-2 text-xs text-slate-400">
-                  Pair a wearable or add sleep manually to unlock your full
-                  morning plan.
-                </p>
-              )}
-            </div>
-
-            {/* Controls row — emoji button + manual button */}
-            <div className="md:col-span-3 mt-2 flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => {
-                  if (wearable) {
-                    fetchFromWearable();
-                  } else {
-                    setShowPair(true);
-                  }
-                }}
-                className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/70 bg-gradient-to-r from-fuchsia-400 via-violet-400 to-sky-400 px-4 py-2 text-xs font-semibold text-slate-950 shadow-md shadow-fuchsia-500/40 transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-sky-400/80 focus:ring-offset-2 focus:ring-offset-slate-950"
-                title={wearable ? `Fetch from ${wearable}` : "Pair wearable"}
-                aria-label={wearable ? `Fetch from ${wearable}` : "Pair wearable"}
-              >
-                <span role="img" aria-hidden="true">
-                  ⌚️
-                </span>
-                {wearable ? `Fetch from ${wearable}` : "Pair wearable"}
-              </button>
-
-              <button
-                onClick={() => setShowManual(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/80 px-4 py-2 text-xs font-medium text-slate-100 shadow-sm shadow-slate-900/60 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400/80 focus:ring-offset-2 focus:ring-offset-slate-950"
-                title="Enter sleep manually"
-              >
-                <span role="img" aria-hidden="true">
-                  ✍️
-                </span>
-                Add sleep manually
-              </button>
             </div>
           </div>
         </section>
@@ -306,131 +279,6 @@ export default function HomePage() {
           </div>
         </section>
       </div>
-
-      {/* Pair wearable modal */}
-      {showPair && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-          onClick={() => setShowPair(false)}
-        >
-          <div
-            className="w-[min(680px,92vw)] rounded-2xl border border-slate-700 bg-slate-950 p-5 text-slate-100 shadow-2xl shadow-black/70"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <div className="text-lg font-semibold">Pair your wearable</div>
-              <button
-                onClick={() => setShowPair(false)}
-                className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs text-slate-200 hover:bg-slate-800"
-              >
-                Close
-              </button>
-            </div>
-
-            <p className="mb-4 text-sm text-slate-300">
-              Choose your device or platform. This demo saves your choice
-              locally. We can wire real integrations next.
-            </p>
-
-            <div className="grid gap-2 md:grid-cols-2">
-              {WEARABLES.map((w) => (
-                <button
-                  key={w}
-                  onClick={() => {
-                    setWearable(w);
-                    setShowPair(false);
-                  }}
-                  className={`text-left rounded-xl border px-3 py-2 text-sm transition ${
-                    wearable === w
-                      ? "border-violet-400 bg-slate-900"
-                      : "border-slate-700 bg-slate-950 hover:border-violet-400 hover:bg-slate-900"
-                  }`}
-                >
-                  {w}
-                </button>
-              ))}
-            </div>
-
-            {wearable && (
-              <div className="mt-4 text-sm text-slate-300">
-                Paired:{" "}
-                <span className="font-medium text-slate-50">{wearable}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Manual sleep modal */}
-      {showManual && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-          onClick={() => setShowManual(false)}
-        >
-          <div
-            className="w-[min(520px,92vw)] rounded-2xl border border-slate-700 bg-slate-950 p-5 text-slate-100 shadow-2xl shadow-black/70"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <div className="text-lg font-semibold">Add sleep manually</div>
-              <button
-                onClick={() => setShowManual(false)}
-                className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs text-slate-200 hover:bg-slate-800"
-              >
-                Close
-              </button>
-            </div>
-
-            <div className="grid gap-3">
-              <label className="text-sm">
-                Sleep score (0–100)
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={manualScore}
-                  onChange={(e) =>
-                    setManualScore(
-                      clamp(parseInt(e.target.value || "0", 10))
-                    )
-                  }
-                  className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder-slate-500"
-                />
-              </label>
-
-              <label className="text-sm">
-                Hours slept
-                <input
-                  type="number"
-                  step="0.1"
-                  min={0}
-                  max={24}
-                  value={manualHours}
-                  onChange={(e) =>
-                    setManualHours(parseFloat(e.target.value || "0"))
-                  }
-                  className="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder-slate-500"
-                />
-              </label>
-
-              <button
-                onClick={() => {
-                  setSleep({
-                    score: clamp(manualScore),
-                    hours: Math.max(0, Math.min(24, manualHours)),
-                    source: "Manual",
-                    updatedAt: Date.now(),
-                  });
-                  setShowManual(false);
-                }}
-                className="mt-1 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-fuchsia-400 via-violet-400 to-sky-400 px-4 py-2 text-sm font-semibold text-slate-950 shadow-md shadow-fuchsia-500/40 transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-sky-400/80 focus:ring-offset-2 focus:ring-offset-slate-950"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
