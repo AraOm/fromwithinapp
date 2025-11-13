@@ -18,6 +18,8 @@ import {
   HeartPulse,
   Brain,
   Gauge,
+  Flower2,
+  Droplets,
 } from "lucide-react";
 
 import { ConnectWearable } from "@/components/ConnectWearable";
@@ -68,6 +70,8 @@ const RECS: Record<
     crystals: string[];
     crystalPlacements: string[];
     poses: string[];
+    plantAllies: string[];
+    essentialOils: string[];
   }
 > = {
   Root: {
@@ -95,6 +99,16 @@ const RECS: Record<
       "Place Black Tourmaline by the front door for a grounded threshold.",
     ],
     poses: ["Mountain", "Warrior II", "Malasana"],
+    plantAllies: [
+      "Grounding roots like dandelion root, burdock, or chicory coffee alternatives.",
+      "Mineral-rich nettle or oatstraw infusions to support bones and steadiness.",
+      "Earthy mushroom allies like reishi or chaga (as guided by your body/practitioner).",
+    ],
+    essentialOils: [
+      "Cedarwood or vetiver in a diffuser for deep grounding.",
+      "Patchouli blended with a carrier oil on the soles of the feet.",
+      "Spruce or pine in a room spray to anchor a safe, earthy space.",
+    ],
   },
   Sacral: {
     color: "#FB8C00",
@@ -121,6 +135,16 @@ const RECS: Record<
       "Orange Calcite at the bath edge during a soak.",
     ],
     poses: ["Low Lunge", "Goddess", "Bridge"],
+    plantAllies: [
+      "Warming spices like cinnamon, cardamom, and ginger to invite circulation to the pelvis.",
+      "Sweet, softening herbs like chamomile or rose to melt tension in the belly.",
+      "Orange peel or rooibos blends that feel cozy and nurturing.",
+    ],
+    essentialOils: [
+      "Sweet orange or mandarin in a diffuser to invite play and flow.",
+      "Ylang ylang (well diluted) over the lower belly for sensual softness.",
+      "Clary sage during rest or creative time (avoid in pregnancy unless guided).",
+    ],
   },
   "Solar Plexus": {
     color: "#FDD835",
@@ -147,6 +171,16 @@ const RECS: Record<
       "Pyrite cube on your desk to anchor decisive action.",
     ],
     poses: ["Boat", "Plank", "Bow"],
+    plantAllies: [
+      "Digestive allies: ginger, peppermint, or fennel tea to support your inner fire.",
+      "Gentle bitters like dandelion leaf or artichoke (as appropriate) before heavier meals.",
+      "Lemon in warm water to cue the gut that it is time to wake up.",
+    ],
+    essentialOils: [
+      "Lemon or grapefruit in a diffuser for clean, focused brightness.",
+      "Ginger or black pepper (well diluted) over the upper belly for gentle fire.",
+      "Rosemary for clear, decisive mental energy (avoid with certain conditions).",
+    ],
   },
   Heart: {
     color: "#43A047",
@@ -173,6 +207,16 @@ const RECS: Record<
       "Green Aventurine under pillow for a soothing sleep tone.",
     ],
     poses: ["Camel (supported)", "Bridge", "Puppy"],
+    plantAllies: [
+      "Heart-soothing herbs like hawthorn, rose, or linden blossom (in tea or tincture form).",
+      "Bright, circulatory allies like hibiscus or cacao for warm, open-hearted focus.",
+      "Lavender or lemon balm to ease emotional tightness and invite gentleness.",
+    ],
+    essentialOils: [
+      "Rose absolute or rose geranium over the heart space (well diluted).",
+      "Lavender in a diffuser to soften edges and invite calm connection.",
+      "Bergamot for gentle uplift when the heart feels heavy.",
+    ],
   },
   Throat: {
     color: "#1E88E5",
@@ -199,6 +243,16 @@ const RECS: Record<
       "Aquamarine worn as a pendant during hard conversations.",
     ],
     poses: ["Fish (supported)", "Cat-Cow", "Shoulderstand (prep)"],
+    plantAllies: [
+      "Classic throat allies like licorice root, slippery elm, and marshmallow (as teas/lozenges).",
+      "Ginger with honey and lemon for warmth and clarity in the voice.",
+      "Peppermint or sage steam inhalation to clear and refresh, if it feels good for you.",
+    ],
+    essentialOils: [
+      "Peppermint in a diffuser or steam (not directly on the throat for sensitive skin).",
+      "Roman chamomile (diluted) on jaw and neck to release gripping.",
+      "Eucalyptus in a steam or diffuser to clear throat and chest space.",
+    ],
   },
   "Third Eye": {
     color: "#5E35B1",
@@ -225,6 +279,16 @@ const RECS: Record<
       "Lapis on the desk for clear thinking.",
     ],
     poses: ["Child's Pose", "Forward Fold", "Eagle (arms)"],
+    plantAllies: [
+      "Nervine allies like skullcap, chamomile, or oat tops for mental quiet.",
+      "Lavender or blue lotus (where legal and appropriate) for dreamy, intuitive states.",
+      "Simple, non-caffeinated evening teas to protect deep REM sleep.",
+    ],
+    essentialOils: [
+      "Frankincense in a diffuser for meditation and inner sight.",
+      "Lavender before bed to soften mental chatter.",
+      "Clary sage (well diluted) in ritual moments to support intuition.",
+    ],
   },
   Crown: {
     color: "#9C27B0",
@@ -251,6 +315,16 @@ const RECS: Record<
       "Clear Quartz by the window to brighten the room’s tone.",
     ],
     poses: ["Savasana", "Lotus (prep)", "Seated Meditation"],
+    plantAllies: [
+      "Light, clarifying herbs like gotu kola or tulsi (as appropriate) for gentle mental clarity.",
+      "Mugwort or milky oats in ritual quantities for dreamwork and spacious awareness.",
+      "Simple, caffeine-free evening infusions to support deep, restorative sleep.",
+    ],
+    essentialOils: [
+      "Frankincense or myrrh in a diffuser for spacious, prayerful energy.",
+      "High-quality lavender on pulse points (diluted) before sleep.",
+      "A simple blend of frankincense + lavender during meditation.",
+    ],
   },
 };
 
@@ -310,15 +384,24 @@ function Pill({
   return (
     <button
       onClick={onClick}
+      aria-pressed={active}
       className={`relative inline-flex items-center justify-center text-xs sm:text-sm font-medium transition-transform ${
-        active ? "scale-[1.02]" : "hover:scale-[1.01]"
+        active ? "scale-[1.04]" : "hover:scale-[1.02]"
       }`}
     >
-      <span className="inline-flex rounded-full bg-gradient-to-br from-fuchsia-400 via-violet-400 to-sky-400 p-[1px] shadow-lg shadow-violet-500/30">
+      <span
+        className={`inline-flex rounded-full p-[1px] shadow-lg ${
+          active
+            ? "bg-gradient-to-br from-fuchsia-400 via-violet-400 to-sky-400 shadow-violet-500/70"
+            : "bg-slate-700/60 shadow-slate-900/40"
+        }`}
+      >
         <span
           className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-full px-3 py-1.5 ${
-            active ? "bg-slate-900" : "bg-slate-950/90"
-          } text-slate-50`}
+            active
+              ? "bg-slate-900 text-slate-50"
+              : "bg-slate-950/90 text-slate-200"
+          }`}
         >
           {children}
         </span>
@@ -465,6 +548,14 @@ export default function InsightsPage() {
     () => uniq<string>(activeChakras.flatMap((c) => RECS[c].crystals)),
     [activeChakras]
   );
+  const plantAllies = useMemo(
+    () => uniq<string>(activeChakras.flatMap((c) => RECS[c].plantAllies)),
+    [activeChakras]
+  );
+  const essentialOils = useMemo(
+    () => uniq<string>(activeChakras.flatMap((c) => RECS[c].essentialOils)),
+    [activeChakras]
+  );
 
   const primaryKey: Chakra =
     (useAuto && autoChakra) || activeChakras[0] || "Heart";
@@ -561,7 +652,7 @@ export default function InsightsPage() {
             </h1>
             <p className="mt-2 max-w-xl text-sm text-slate-300">
               Translate your heart rate, sleep, and body sensations into
-              grounded micro-practices, food, crystals, and breathwork.
+              grounded micro-practices, food, plants, crystals, and breathwork.
             </p>
           </div>
 
@@ -730,7 +821,8 @@ export default function InsightsPage() {
               </div>
               <p className="text-sm">
                 Connect your wearable or select an area above to see stretches,
-                breathwork, micro-practices, crystals, and a personalized plan.
+                breathwork, micro-practices, food, plant allies, crystals, and
+                a personalized plan.
               </p>
             </CardContent>
           </Card>
@@ -858,6 +950,74 @@ export default function InsightsPage() {
               </div>
             </Card>
 
+            {/* Plant Allies & Essential Oils */}
+            <Card className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 shadow-xl">
+              <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl" />
+              <div className="pointer-events-none absolute -right-8 bottom-0 h-32 w-32 rounded-full bg-sky-500/10 blur-3xl" />
+
+              <div className="relative z-10">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-50">
+                    <Flower2 className="h-4 w-4 text-emerald-200" /> Plant
+                    Allies & Essential Oils
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 pt-0">
+                  <p className="text-sm text-slate-300">
+                    Gentle plant and aromatic allies that harmonize with your
+                    current chakra focus. Always listen to your body and check
+                    with your practitioners where needed.
+                  </p>
+
+                  <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3">
+                    <div className="mb-1 text-sm font-medium text-emerald-100">
+                      Suggested plant allies
+                    </div>
+                    <ul className="list-disc space-y-1 pl-6 text-xs text-emerald-50">
+                      {plantAllies.length > 0 ? (
+                        plantAllies.map((s) => <li key={s}>{s}</li>)
+                      ) : (
+                        <>
+                          <li>
+                            Begin with simple, single-herb teas like chamomile,
+                            peppermint, or tulsi.
+                          </li>
+                          <li>
+                            Notice how your body responds over a few days before
+                            layering more complexity.
+                          </li>
+                        </>
+                      )}
+                    </ul>
+
+                    {essentialOils.length > 0 && (
+                      <div className="mt-3">
+                        <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-emerald-100/90">
+                          <Droplets className="h-3 w-3 text-emerald-100" />
+                          Essential oils to explore
+                        </div>
+                        <ul className="list-disc space-y-1 pl-6 text-[11px] text-emerald-50">
+                          {essentialOils.map((oil) => (
+                            <li key={oil}>{oil}</li>
+                          ))}
+                        </ul>
+                        <p className="mt-1 text-[10px] text-emerald-100/80">
+                          Always dilute essential oils properly and patch-test
+                          first. Avoid internal use or undiluted application
+                          unless guided by a qualified practitioner.
+                        </p>
+                      </div>
+                    )}
+
+                    <p className="mt-2 text-[10px] text-emerald-100/80">
+                      These are educational suggestions and not medical advice.
+                      Check in with your healthcare provider where needed.
+                    </p>
+                  </div>
+                </CardContent>
+              </div>
+            </Card>
+
             {/* Personalized Plan */}
             <Card className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 shadow-xl">
               <div className="pointer-events-none absolute -left-12 top-0 h-32 w-32 rounded-full bg-violet-500/10 blur-3xl" />
@@ -943,4 +1103,3 @@ export default function InsightsPage() {
     </div>
   );
 }
-

@@ -11,7 +11,7 @@ import {
   Sunrise,
   StretchHorizontal,
   Wind,
-  Flower2, // replacing Lotus
+  Flower2, // meditation icon
   Soup,
   Dumbbell,
   Sparkles,
@@ -21,6 +21,9 @@ import {
   Watch,
   CheckCircle2,
   Gem,
+  Leaf,
+  Flame,
+  Droplet,
 } from "lucide-react";
 
 /** ──────────────────────────────────────────────────────────────
@@ -56,6 +59,7 @@ type MorningPlan = {
   yoga: RecItem[];
   breakfast: RecItem[];
   crystals: RecItem[];
+  plantAllies: RecItem[];
 };
 
 type MorningVibe = {
@@ -199,15 +203,14 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
   const needsEnergy = lowDuration || hrvDown || hrvLow;
   const needsGentle = lowDuration || manyWakes || highRestless;
 
-  // — Stretches —
+  // — Stretches (more descriptive) —
   const stretches: RecItem[] = [
     {
       id: id("Neck + Shoulder Unwind"),
       title: "Neck + Shoulder Unwind",
       minutes: needsGentle ? 3 : 5,
-      blurb: needsGentle
-        ? "Gentle side bends and shoulder rolls to release sleep stiffness without spiking cortisol."
-        : "Free up the neck/upper back so breathing feels spacious.",
+      blurb:
+        "Sit or stand tall. Let your right ear lower toward your right shoulder and breathe for 3–5 slow breaths. Switch sides. Then roll both shoulders up, back, and down several times, letting the upper back soften.",
       tags: ["gentle", "release"],
       icon: <StretchHorizontal className="w-4 h-4" />,
     },
@@ -216,7 +219,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
       title: "Low Back Reset",
       minutes: 3,
       blurb:
-        "Supine knees-to-chest + easy twists; calm the lumbar and wring out residual tension.",
+        "Lie on your back and hug both knees toward your chest. Gently rock side to side. Then drop both knees to the right for a simple twist, breathe for 5 breaths, and repeat on the left to rinse out the lumbar spine.",
       tags: ["twist", "restorative"],
       icon: <Dumbbell className="w-4 h-4" />,
     },
@@ -230,7 +233,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           title: "Extended Exhale (4–6)",
           minutes: 4,
           blurb:
-            "Inhale 4, exhale 6. Downshifts the nervous system and steadies a restless night.",
+            "Inhale slowly through the nose for a count of 4, then exhale gently for a count of 6. Keep shoulders relaxed. Repeat for a few minutes to downshift your nervous system.",
           tags: ["parasympathetic", "downshift"],
           icon: <Wind className="w-4 h-4" />,
         },
@@ -239,7 +242,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           title: "Box Breath",
           minutes: 3,
           blurb:
-            "Inhale 4, hold 4, exhale 4, hold 4. Evens the mind when sleep was choppy.",
+            "Inhale for 4, hold for 4, exhale for 4, hold for 4. Keep the breath smooth and light. Imagine tracing the sides of a square with each phase of the breath.",
           tags: ["focus", "balance"],
           icon: <Timer className="w-4 h-4" />,
         },
@@ -248,10 +251,10 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
     ? [
         {
           id: id("Balancing Nadi Shodhana"),
-          title: "Nadi Shodhana",
+          title: "Nadi Shodhana (Alternate Nostril)",
           minutes: 4,
           blurb:
-            "Alternate-nostril breathing to balance hemispheres and lift energy without jitters.",
+            "Sit tall. Use your right hand: close the right nostril and inhale through the left, then close the left and exhale through the right. Inhale right, exhale left. Continue for several rounds to balance both sides of the body.",
           tags: ["balance", "clarity"],
           icon: <Wind className="w-4 h-4" />,
         },
@@ -260,7 +263,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           title: "Breath of Fire (gentle)",
           minutes: 2,
           blurb:
-            "Short, gentle kapalabhati rounds to spark alertness—skip if you feel anxious.",
+            "Sit tall and place a hand on your lower belly. Take quick, small exhales through the nose by gently pumping the belly, letting inhales happen naturally. Keep it light and stop if you feel dizzy.",
           tags: ["energize"],
           icon: <Activity className="w-4 h-4" />,
         },
@@ -271,7 +274,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           title: "Coherent Breathing (5:5)",
           minutes: 5,
           blurb:
-            "Inhale 5, exhale 5. Smooths HRV and sets an easy baseline for the day.",
+            "Inhale for 5 counts and exhale for 5 counts through the nose. Keep the breath soft, not forced. This smooth rhythm helps your heart and nervous system sync.",
           tags: ["steady", "HRV"],
           icon: <HeartPulse className="w-4 h-4" />,
         },
@@ -284,7 +287,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
       title: "2-Minute Arrival",
       minutes: 2,
       blurb:
-        "Eyes soft, feel feet → breath → chest. Name one intention for today.",
+        "Sit or lie comfortably. Feel your feet, then your breath, then the center of your chest. Silently name one intention for how you want to move through today.",
       tags: ["mindful", "short"],
       icon: <Sparkles className="w-4 h-4" />,
     },
@@ -294,7 +297,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           title: "Body Scan (short)",
           minutes: 5,
           blurb:
-            "Soften jaw, throat, chest, belly. Let the body feel safe to wake.",
+            "Starting at your forehead, slowly move attention down through your jaw, throat, chest, belly, hips, legs, and feet. At each region, invite a tiny bit more softness with each exhale.",
           tags: ["calm", "ground"],
           icon: <Flower2 className="w-4 h-4" />,
         }
@@ -303,13 +306,13 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           title: "Focused Clarity",
           minutes: 4,
           blurb:
-            "Single-point attention on breath—sharpen focus after an OK night.",
+            "Choose one point to focus on: the tip of the nose, the sound of the breath, or a candle flame. Each time the mind wanders, gently escort it back without judgment.",
           tags: ["focus"],
           icon: <Flower2 className="w-4 h-4" />,
         },
   ].filter(Boolean) as RecItem[];
 
-  // — Yoga —
+  // — Yoga (more descriptive) —
   const yoga: RecItem[] = needsGentle
     ? [
         {
@@ -317,7 +320,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           title: "Cat–Cow → Puppy Pose",
           minutes: 4,
           blurb:
-            "Warm the spine with Cat–Cow. Melt heart in Puppy to open breath without strain.",
+            "Come onto hands and knees. Inhale to arch the spine gently (Cow), exhale to round (Cat) for 6–8 rounds. Then walk your hands forward, keep hips over knees, and lower your chest toward the floor for Puppy Pose, breathing into the heart and shoulders.",
           tags: ["gentle", "spine"],
           icon: <StretchHorizontal className="w-4 h-4" />,
         },
@@ -326,7 +329,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           title: "Supported Uttanasana",
           minutes: 2,
           blurb:
-            "Hinge from hips, support hands on blocks/chair; release hamstrings + back line.",
+            "Stand with feet hip-width. Hinge at the hips and rest your hands on a chair, blocks, or your thighs. Let your head hang heavy and knees stay soft. Breathe into the back of your legs and spine.",
           tags: ["restorative"],
           icon: <StretchHorizontal className="w-4 h-4" />,
         },
@@ -337,7 +340,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           title: "Sun Salutation A ×3",
           minutes: 6,
           blurb:
-            "Three steady rounds to circulate blood, brighten mood, and cue an alert body.",
+            "From standing, inhale arms up, exhale fold forward. Inhale halfway lift, exhale step back to plank and lower. Inhale cobra or upward dog, exhale to downward dog. Step forward, inhale halfway, exhale fold, inhale rise to stand. Repeat 3 rounds at a steady pace.",
           tags: ["energize", "flow"],
           icon: <Sunrise className="w-4 h-4" />,
         },
@@ -346,7 +349,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           title: "Utkatasana + Setu Bandha",
           minutes: 4,
           blurb:
-            "Light leg/hip activation with a heart-opening bridge to wake posterior chain.",
+            "For Chair, stand with feet hip-width, bend knees as if sitting back into a low stool, reach arms forward or up, and keep weight in your heels. For Bridge, lie on your back, feet under knees, press feet down to lift hips, and open the front body for several breaths.",
           tags: ["strength", "open"],
           icon: <Dumbbell className="w-4 h-4" />,
         },
@@ -359,7 +362,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Protein Oats"),
           title: "Protein Oats",
           blurb:
-            "Warm oats with chia + nut butter; add berries. Steady glucose, steady focus.",
+            "Warm oats with chia and nut butter; add berries. This mix gives steady carbs, protein, and healthy fats for longer-lasting focus.",
           tags: ["protein", "fiber", "berries"],
           icon: <Coffee className="w-4 h-4" />,
         },
@@ -367,7 +370,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Hydration + Minerals"),
           title: "Hydration + Minerals",
           blurb:
-            "Water with pinch of sea salt + lemon. Rehydrate after short or restless sleep.",
+            "Start with a big glass of water with a pinch of sea salt and lemon. Sip slowly to rebuild hydration and minerals after short or restless sleep.",
           tags: ["electrolytes"],
           icon: <Soup className="w-4 h-4" />,
         },
@@ -378,7 +381,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Warm Cinnamon Quinoa"),
           title: "Warm Cinnamon Quinoa",
           blurb:
-            "Soothing, easy-to-digest bowl with almond milk; calm stomach after choppy sleep.",
+            "Cook quinoa in plant milk, add a touch of cinnamon, and top with a few nuts or seeds. Gentle on digestion and comforting for the nervous system.",
           tags: ["soothing", "GF"],
           icon: <Soup className="w-4 h-4" />,
         },
@@ -386,7 +389,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Green Tea"),
           title: "Green Tea",
           blurb:
-            "Gentle lift with L-theanine for calm focus vs. a hard caffeine spike.",
+            "A lighter caffeine option with L-theanine to support calm, focused alertness instead of a harsh jolt.",
           tags: ["calm focus"],
           icon: <Coffee className="w-4 h-4" />,
         },
@@ -396,7 +399,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Eggs + Greens Wrap"),
           title: "Eggs + Greens Wrap",
           blurb:
-            "Simple protein + greens + avocado in a wrap; satiating and clean fuel.",
+            "Scramble or bake eggs and wrap them with greens and a little avocado. Simple, satiating, and balanced for an even morning.",
           tags: ["protein", "healthy fats"],
           icon: <Soup className="w-4 h-4" />,
         },
@@ -404,7 +407,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Fruit + Yogurt"),
           title: "Fruit + Yogurt",
           blurb:
-            "Probiotic support and light carbs for an ‘okay’ night—keeps energy stable.",
+            "Pair a small portion of fruit with yogurt for easy probiotics and gentle carbs that will not spike energy too sharply.",
           tags: ["probiotic", "light"],
           icon: <Soup className="w-4 h-4" />,
         },
@@ -417,7 +420,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Citrine"),
           title: "Citrine",
           blurb:
-            "Bright, solar energy to boost vitality and motivation after low sleep.",
+            "Bright, solar energy to boost vitality and motivation after low sleep. Keep it in a pocket or bra close to the solar plexus.",
           tags: ["energy", "solar"],
           icon: <Gem className="w-4 h-4" />,
         },
@@ -425,7 +428,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Carnelian"),
           title: "Carnelian",
           blurb:
-            "Warms the sacral center—gentle lift for creativity, mood, and momentum.",
+            "Warms the sacral center for creativity, mood, and momentum. Keep it near your lower belly or in a pocket.",
           tags: ["vitality", "sacral"],
           icon: <Gem className="w-4 h-4" />,
         },
@@ -436,7 +439,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Amethyst"),
           title: "Amethyst",
           blurb:
-            "Soothes mental chatter and eases nervous tension after a restless night.",
+            "Soothes mental chatter and eases nervous tension after a restless night. Keep it near your pillow or at your desk.",
           tags: ["calm", "third-eye"],
           icon: <Gem className="w-4 h-4" />,
         },
@@ -444,7 +447,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Lepidolite"),
           title: "Lepidolite",
           blurb:
-            "Supports emotional balance; helpful when sleep was fragmented or anxious.",
+            "Supports emotional balance; helpful when sleep is fragmented or anxious. Carry it during the day when things feel heavy.",
           tags: ["balance", "soften"],
           icon: <Gem className="w-4 h-4" />,
         },
@@ -454,7 +457,7 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Clear Quartz"),
           title: "Clear Quartz",
           blurb:
-            "Amplifies intention and brings clarity—great companion for a balanced day.",
+            "Amplifies intention and brings clarity. Hold it for a moment while naming what you want your day to feel like.",
           tags: ["clarity", "amplify"],
           icon: <Gem className="w-4 h-4" />,
         },
@@ -462,13 +465,139 @@ function buildMorningPlan(s: SleepSummary): MorningPlan {
           id: id("Green Aventurine"),
           title: "Green Aventurine",
           blurb:
-            "Encourages optimism and soft heart-opening—smooth support after an okay night.",
+            "Encourages optimism and soft heart-opening. Keep it in a pocket or near the heart to invite ease into interactions.",
           tags: ["heart", "optimism"],
           icon: <Gem className="w-4 h-4" />,
         },
       ];
 
-  return { stretches, breathwork, meditations, yoga, breakfast, crystals };
+  // — Plant Allies (herbal + essential oils) —
+  const plantAllies: RecItem[] = needsEnergy
+    ? [
+        {
+          id: id("Uplifting Plant Allies"),
+          title: "Plant Allies for Lift + Focus",
+          subtitle: "Herbs · Uplifting",
+          blurb:
+            "Consider gentle energizers like tulsi (holy basil), rosemary, or light green tea to wake the system without pushing it too hard.",
+          tags: ["clarity", "gentle lift", "Uplifting"],
+          icon: <Leaf className="w-4 h-4" />,
+        },
+        {
+          id: id("Uplifting Essential Oils"),
+          title: "Essential Oils · Uplifting",
+          subtitle: "Sweet orange · Lemon · Peppermint",
+          blurb:
+            "Place 1–2 drops of sweet orange or lemon in your diffuser or dilute in a carrier oil. Apply a tiny amount to wrists or palms, then cup hands over your nose and take 3 soft, bright breaths to invite focus and joy.",
+          tags: ["essential oil", "Uplifting", "solar"],
+          icon: <Droplet className="w-4 h-4" />,
+        },
+        {
+          id: id("Focus Fire Blend"),
+          title: "Focus Fire Blend",
+          subtitle: "Rosemary · Peppermint",
+          blurb:
+            "If your brain feels foggy, add a drop of rosemary with a touch of peppermint to a tissue or inhaler. Inhale 3–5 times before you sit down to your first focused task.",
+          tags: ["essential oil", "focus", "Uplifting"],
+          icon: <Flame className="w-4 h-4" />,
+        },
+        {
+          id: id("Mineral-Rich Support"),
+          title: "Mineral-Rich Infusion",
+          subtitle: "Herbs · Grounding",
+          blurb:
+            "Nettle or oatstraw infusions (if they work for your body) can replenish minerals and support steady, grounded energy. Sip slowly while you plan your day.",
+          tags: ["minerals", "nourish", "Grounding"],
+          icon: <Leaf className="w-4 h-4" />,
+        },
+      ]
+    : needsCalm
+    ? [
+        {
+          id: id("Nervous System Soothers"),
+          title: "Nervous System Soothers",
+          subtitle: "Herbs · Grounding",
+          blurb:
+            "Chamomile, lemon balm, or passionflower teas can help ease a wired-but-tired system after choppy sleep. Make a small mug and sip it like medicine for your nerves.",
+          tags: ["calm", "soothe", "Grounding"],
+          icon: <Leaf className="w-4 h-4" />,
+        },
+        {
+          id: id("Grounding Essential Oils"),
+          title: "Essential Oils · Grounding",
+          subtitle: "Cedarwood · Vetiver · Frankincense",
+          blurb:
+            "Place 1 drop of cedarwood or vetiver in your palms with carrier oil. Rub hands together, then cup over your face and inhale 3 slow breaths while feeling your feet heavy on the floor.",
+          tags: ["essential oil", "Grounding", "nervous system"],
+          icon: <Droplet className="w-4 h-4" />,
+        },
+        {
+          id: id("Heart-Softening Allies"),
+          title: "Heart-Softening Allies",
+          subtitle: "Herbs · Heart-Opening",
+          blurb:
+            "Rose, hawthorn, or linden blossoms (as teas or tinctures) can bring a soft, heart-centered tone to the morning. Sip while placing one hand on your heart.",
+          tags: ["heart", "softness", "Heart-Opening"],
+          icon: <Leaf className="w-4 h-4" />,
+        },
+        {
+          id: id("Heart-Opening Oils"),
+          title: "Essential Oils · Heart-Opening",
+          subtitle: "Rose · Geranium · Ylang Ylang",
+          blurb:
+            "Dilute 1 drop of rose or geranium in carrier oil and gently massage over the center of your chest. Take 3–5 breaths imagining the front of your heart brightening and softening.",
+          tags: ["essential oil", "Heart-Opening"],
+          icon: <Flame className="w-4 h-4" />,
+        },
+      ]
+    : [
+        {
+          id: id("Balancing Plant Allies"),
+          title: "Balancing Plant Allies",
+          subtitle: "Herbs · Steady",
+          blurb:
+            "Gentle harmonizers like tulsi, chamomile, or rooibos can support your system without pulling it too far up or down.",
+          tags: ["balance", "steady"],
+          icon: <Leaf className="w-4 h-4" />,
+        },
+        {
+          id: id("Daily Herbal Ritual"),
+          title: "Simple Herbal Ritual",
+          subtitle: "Herbs · Mindful",
+          blurb:
+            "Choose one supportive plant and make it a tiny ritual: smell the tea, take three slow breaths, then sip with intention.",
+          tags: ["ritual", "mindful"],
+          icon: <Leaf className="w-4 h-4" />,
+        },
+        {
+          id: id("Shower Steam Ritual"),
+          title: "Essential Oils · Grounding",
+          subtitle: "Eucalyptus · Lavender",
+          blurb:
+            "Before your shower, place 1–2 drops of eucalyptus or lavender in the corner of the tub or on a washcloth away from direct skin contact. Let the steam carry the scent while you breathe in for 4, out for 6.",
+          tags: ["essential oil", "Grounding", "reset"],
+          icon: <Droplet className="w-4 h-4" />,
+        },
+        {
+          id: id("Soft Heart Diffuser Blend"),
+          title: "Soft Heart Diffuser Blend",
+          subtitle: "Heart-Opening",
+          blurb:
+            "In your diffuser, mix 2 drops lavender, 1 drop geranium, and 1 drop sweet orange. As it diffuses, take a moment to ask, “How can I meet myself with more kindness today?”",
+          tags: ["Heart-Opening", "essential oil", "ritual"],
+          icon: <Flame className="w-4 h-4" />,
+        },
+      ];
+
+  return {
+    stretches,
+    breathwork,
+    meditations,
+    yoga,
+    breakfast,
+    crystals,
+    plantAllies,
+  };
 }
 
 /** ──────────────────────────────────────────────────────────────
@@ -520,9 +649,6 @@ function MetricRow({ sleep }: { sleep: SleepSummary }) {
 }
 
 function Section({ title, items }: { title: string; items: RecItem[] }) {
-  const [done, setDone] = useState<Record<string, boolean>>({});
-  const toggle = (id: string) => setDone((d) => ({ ...d, [id]: !d[id] }));
-
   return (
     <section className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 p-5 shadow-xl transition hover:border-violet-400/60 hover:bg-slate-900/90">
       <div className="pointer-events-none absolute -left-16 top-0 h-40 w-40 rounded-full bg-fuchsia-500/10 blur-3xl" />
@@ -538,48 +664,30 @@ function Section({ title, items }: { title: string; items: RecItem[] }) {
           {items.map((it) => (
             <li
               key={it.id}
-              className="flex items-start justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-950/80 p-4 shadow-sm transition hover:border-violet-400/70 hover:bg-slate-900/95"
+              className="flex items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/80 p-4 shadow-sm transition hover:border-violet-400/70 hover:bg-slate-900/95"
             >
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-400/30 via-violet-400/30 to-sky-400/30 p-[1px] shadow-lg shadow-violet-500/30">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-950">
-                    {it.icon}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-slate-50">
-                    {it.title}
-                  </div>
-                  {it.subtitle && (
-                    <div className="text-xs text-slate-400">{it.subtitle}</div>
-                  )}
-                  <div className="mt-1 text-xs text-slate-200">
-                    {it.blurb}
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {it.minutes ? (
-                      <Chip title="Estimated minutes">~{it.minutes} min</Chip>
-                    ) : null}
-                    {it.tags?.map((t) => (
-                      <Chip key={t}>{t}</Chip>
-                    ))}
-                  </div>
+              <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-400/30 via-violet-400/30 to-sky-400/30 p-[1px] shadow-lg shadow-violet-500/30">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-950">
+                  {it.icon}
                 </div>
               </div>
-              <button
-                aria-label={done[it.id] ? "Mark as not done" : "Mark as done"}
-                onClick={() => toggle(it.id)}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-sky-400/80 focus:ring-offset-2 focus:ring-offset-slate-950 ${
-                  done[it.id]
-                    ? "bg-emerald-400/95 text-slate-950 shadow-lg shadow-emerald-500/40"
-                    : "bg-gradient-to-r from-fuchsia-400 via-violet-400 to-sky-400 text-slate-950 shadow-md shadow-fuchsia-500/40 hover:brightness-110"
-                }`}
-              >
-                <span className="inline-flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  {done[it.id] ? "Done" : "Do"}
-                </span>
-              </button>
+              <div>
+                <div className="text-sm font-medium text-slate-50">
+                  {it.title}
+                </div>
+                {it.subtitle && (
+                  <div className="text-xs text-slate-400">{it.subtitle}</div>
+                )}
+                <div className="mt-1 text-xs text-slate-200">{it.blurb}</div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {it.minutes ? (
+                    <Chip title="Estimated minutes">~{it.minutes} min</Chip>
+                  ) : null}
+                  {it.tags?.map((t) => (
+                    <Chip key={t}>{t}</Chip>
+                  ))}
+                </div>
+              </div>
             </li>
           ))}
         </ul>
@@ -642,8 +750,8 @@ export default function MorningPage() {
             </h1>
             <p className="mt-2 max-w-xl text-sm text-slate-300">
               Based on how you slept, we’ve woven together stretches, breath,
-              meditation, movement, nourishment, and crystals to meet you where
-              you actually are today.
+              meditation, movement, nourishment, crystals and plant allies to
+              meet you where you actually are today.
             </p>
           </div>
 
@@ -718,6 +826,10 @@ export default function MorningPage() {
           <Section title="Yoga Poses" items={plan.yoga} />
           <Section title="Breakfast & Hydration" items={plan.breakfast} />
           <Section title="Crystals to Carry" items={plan.crystals} />
+          <Section
+            title="Plant Allies · Herbs & Oils"
+            items={plan.plantAllies}
+          />
         </div>
       </div>
     </main>

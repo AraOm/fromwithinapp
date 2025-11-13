@@ -1,4 +1,3 @@
-// src/pages/api/create-checkout-session.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 
@@ -18,14 +17,15 @@ export default async function handler(
 
   const { plan } = req.body || {};
 
-  // Decide which Stripe price + mode to use
   let priceId: string | undefined;
   let mode: "subscription" | "payment" = "subscription";
 
   if (plan === "golden") {
+    // Monthly Golden Lion (with 7-day trial set in code)
     priceId = process.env.NEXT_PUBLIC_PRICE_GOLDEN;
     mode = "subscription";
   } else if (plan === "infinity") {
+    // ∞ Path lifetime — one-time payment
     priceId = process.env.NEXT_PUBLIC_PRICE_INFINITY;
     mode = "payment";
   }
@@ -43,6 +43,8 @@ export default async function handler(
     "http://localhost:3000/checkout/cancel";
 
   try {
+    const isSubscription = mode === "subscription";
+
     const session = await stripe.checkout.sessions.create({
       mode,
       line_items: [
@@ -54,6 +56,13 @@ export default async function handler(
       allow_promotion_codes: true,
       success_url: successUrl,
       cancel_url: cancelUrl,
+
+      // 🔮 Add 7-day trial for Golden Lion subscriptions
+      ...(isSubscription && {
+        subscription_data: {
+          trial_period_days: 7,
+        },
+      }),
     });
 
     return res.status(200).json({ url: session.url ?? "" });
