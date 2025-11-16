@@ -38,7 +38,9 @@ const Item: React.FC<ItemProps> = ({ href, label, icon }) => {
       <div
         className={cx(
           "mb-1 text-2xl leading-none not-italic",
-          isActive ? "translate-y-[-1px]" : "hover:translate-y-[-1px] active:translate-y-0",
+          isActive
+            ? "translate-y-[-1px]"
+            : "hover:translate-y-[-1px] active:translate-y-0",
           "transition-transform duration-150 ease-out",
         )}
       >
@@ -50,15 +52,24 @@ const Item: React.FC<ItemProps> = ({ href, label, icon }) => {
 };
 
 export default function BottomNav() {
+  // NEW: 6 items including Beta Feedback
   const items: ItemProps[] = [
-    { href: "/checkin", label: "Check-In", icon: <span aria-hidden>🜃</span> },
-    { href: "/mentor", label: "Mentor", icon: <span aria-hidden>☪︎</span> },
-    { href: "/insights", label: "Body Insig…", icon: <span aria-hidden>〰️</span> },
-    { href: "/community", label: "Community", icon: <span aria-hidden>ૐ</span> },
-    { href: "/tarot", label: "Tarot", icon: <span aria-hidden>🀧</span> },
-    { href: "/learning", label: "Learning", icon: <span aria-hidden>𓂀</span> },
-    { href: "/energy-calendar", label: "Energy Cal…", icon: <span aria-hidden>𖦹</span> },
-    { href: "/play", label: "Play", icon: <span aria-hidden>𓀪</span> },
+    { href: "/today", label: "Today", icon: <span aria-hidden>☀️</span> },
+    { href: "/guide", label: "Guide", icon: <span aria-hidden>🜃</span> },
+    { href: "/insights", label: "Insights", icon: <span aria-hidden>﹏</span> },
+    {
+      href: "/community",
+      label: "Community",
+      icon: <span aria-hidden>𓀤𓀥</span>,
+    },
+    { href: "/studio", label: "Studio", icon: <span aria-hidden>ॐ</span> },
+
+    // ⭐ NEW TILE — Beta Feedback
+    {
+      href: "/beta-feedback",
+      label: "Feedback",
+      icon: <span aria-hidden>🧪</span>,
+    },
   ];
 
   // Measure the nav (including safe-area padding) and publish it to --tabbar-h
@@ -110,7 +121,8 @@ export default function BottomNav() {
         {items.map((it) => (
           <Item key={it.href} {...it} />
         ))}
-        {/* Edge fades now match the purple bar */}
+
+        {/* Edge fades match purple bar */}
         <div className="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-[#120027]/85 to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-[#120027]/85 to-transparent" />
       </div>

@@ -1,1105 +1,347 @@
 // src/pages/insights.tsx
-import React, { useMemo, useRef, useState } from "react";
-// shadcn/ui (or your equivalents)
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-// icons
+"use client";
+
+import React, { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import {
   Activity,
-  Wind,
-  Sparkles,
-  Soup,
-  Gem,
-  Sun,
-  Moon,
-  RefreshCw,
-  Watch,
-  HeartPulse,
   Brain,
-  Gauge,
-  Flower2,
-  Droplets,
+  Gem,
+  HeartPulse,
+  Info,
+  Moon,
+  Sparkles,
+  Sun,
+  Wind,
+  ArrowRight,
 } from "lucide-react";
 
-import { ConnectWearable } from "@/components/ConnectWearable";
+/* ──────────────────────────────────────────────────────────────
+ * Types
+ * ────────────────────────────────────────────────────────────── */
 
-/* ----------------------------- Types & Data ----------------------------- */
-
-export type BodyArea =
-  | "head"
-  | "throat"
-  | "chest"
-  | "solar_plexus"
-  | "belly"
-  | "hips"
-  | "legs"
-  | "feet";
-
-export type Chakra =
-  | "Root"
-  | "Sacral"
-  | "Solar Plexus"
-  | "Heart"
-  | "Throat"
-  | "Third Eye"
-  | "Crown";
-
-type Biometrics = {
-  rhr: number;
-  hrv: number;
-  sleepHours: number;
-  remPct: number;
-  deepPct: number;
-  respRate: number;
-  skinTempDelta: number;
-  stress: number;
-  steps: number;
+type InsightResponse = {
+  message?: string;
+  insight?: string;
+  text?: string;
 };
 
-const RECS: Record<
-  Chakra,
+type ChakraCard = {
+  id: string;
+  name: string;
+  color: string;
+  focus: string;
+  body: string;
+  micro: string;
+};
+
+/* ──────────────────────────────────────────────────────────────
+ * Static chakra data (can evolve later)
+ * ────────────────────────────────────────────────────────────── */
+
+const CHAKRAS: ChakraCard[] = [
   {
-    color: string;
-    mantra: string;
-    foodsSentences: string[];
-    stretches: string[];
-    breath: string;
-    microPractices: string[];
-    energyInsight: string;
-    crystals: string[];
-    crystalPlacements: string[];
-    poses: string[];
-    plantAllies: string[];
-    essentialOils: string[];
+    id: "root",
+    name: "Root · Muladhara",
+    color: "from-rose-500 via-red-500 to-orange-500",
+    focus: "Safety, belonging, stability",
+    body: "Feet, legs, pelvis, lower spine",
+    micro:
+      "Press your feet into the floor for 30 seconds and feel the weight dropping down. One honest exhale with the thought, “I am supported enough for this moment.”",
+  },
+  {
+    id: "sacral",
+    name: "Sacral · Svadhisthana",
+    color: "from-orange-500 via-amber-400 to-rose-400",
+    focus: "Emotion, pleasure, fluidity",
+    body: "Hips, low belly, reproductive organs",
+    micro:
+      "Rock your hips slowly in a small circle while seated or standing. Let the breath move like a tide in the low belly.",
+  },
+  {
+    id: "solar",
+    name: "Solar Plexus · Manipura",
+    color: "from-amber-400 via-yellow-400 to-lime-400",
+    focus: "Confidence, will, digestion",
+    body: "Stomach, diaphragm, mid-spine",
+    micro:
+      "Place a warm hand on your upper belly. Inhale gently into the hand, exhale with the words, “I’m allowed to take up space.”",
+  },
+  {
+    id: "heart",
+    name: "Heart · Anahata",
+    color: "from-emerald-400 via-teal-400 to-sky-400",
+    focus: "Love, connection, compassion",
+    body: "Chest, lungs, upper back, arms",
+    micro:
+      "Roll the shoulders up, back, and down three times. Then rest one hand on your heart and name one person (or being) you’re grateful for.",
+  },
+  {
+    id: "throat",
+    name: "Throat · Vishuddha",
+    color: "from-sky-400 via-blue-400 to-indigo-400",
+    focus: "Expression, truth, boundaries",
+    body: "Throat, neck, jaw, shoulders",
+    micro:
+      "Stretch the neck gently side to side, then whisper one simple true sentence you’ve been holding back — just for you.",
+  },
+  {
+    id: "third-eye",
+    name: "Third Eye · Ajna",
+    color: "from-indigo-400 via-violet-400 to-fuchsia-400",
+    focus: "Insight, intuition, perspective",
+    body: "Eyes, brow, temples, head",
+    micro:
+      "Soften your gaze or close your eyes. Imagine a cool indigo light between your brows and ask, “What would future-me thank me for today?”",
+  },
+  {
+    id: "crown",
+    name: "Crown · Sahasrara",
+    color: "from-fuchsia-400 via-purple-400 to-slate-200",
+    focus: "Connection, meaning, spaciousness",
+    body: "Top of head, nervous system as a whole",
+    micro:
+      "Lengthen your spine, lift the crown of your head. Imagine a soft stream of light pouring down through you and out through the soles of your feet.",
+  },
+];
+
+/* ──────────────────────────────────────────────────────────────
+ * AI helper
+ * ────────────────────────────────────────────────────────────── */
+
+async function fetchBodyInsight(): Promise<string> {
+  try {
+    const res = await fetch("/api/energy/insight", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        intent:
+          "Return a concise, 1–2 paragraph body + energy insight that feels like a luxury nervous-system mentor. Include 2–3 tiny, realistic actions.",
+      }),
+    });
+
+    if (!res.ok) throw new Error("Request failed");
+    const data: InsightResponse = await res.json();
+
+    const text =
+      data.message || data.insight || data.text || JSON.stringify(data);
+
+    if (text && typeof text === "string") return text.trim();
+  } catch (e) {
+    // ignore, fall through to default
   }
-> = {
-  Root: {
-    color: "#E53935",
-    mantra: "I am safe. I am here.",
-    foodsSentences: [
-      "Warm lentil soup with turmeric and ginger.",
-      "Roasted root vegetables with olive oil and sea salt.",
-      "Beet juice or roasted beets for grounding minerals.",
-      "Ginger tea or golden milk to warm and steady.",
-    ],
-    stretches: [
-      "Knees-to-chest, 5 slow breaths.",
-      "Supine hamstring stretch, 30s each side.",
-    ],
-    breath: "4-4-4-4 Box Breathing (2–3 min).",
-    microPractices: [
-      "Barefoot 3-minute earth stand.",
-      "Slow walk while naming 5 things you see.",
-    ],
-    energyInsight: "Stability returns when you move slowly and feel your feet.",
-    crystals: ["Hematite", "Black Tourmaline", "Red Jasper"],
-    crystalPlacements: [
-      "Pocket a Hematite stone during errands.",
-      "Place Black Tourmaline by the front door for a grounded threshold.",
-    ],
-    poses: ["Mountain", "Warrior II", "Malasana"],
-    plantAllies: [
-      "Grounding roots like dandelion root, burdock, or chicory coffee alternatives.",
-      "Mineral-rich nettle or oatstraw infusions to support bones and steadiness.",
-      "Earthy mushroom allies like reishi or chaga (as guided by your body/practitioner).",
-    ],
-    essentialOils: [
-      "Cedarwood or vetiver in a diffuser for deep grounding.",
-      "Patchouli blended with a carrier oil on the soles of the feet.",
-      "Spruce or pine in a room spray to anchor a safe, earthy space.",
-    ],
-  },
-  Sacral: {
-    color: "#FB8C00",
-    mantra: "I feel and flow with ease.",
-    foodsSentences: [
-      "Stewed apricots with cinnamon.",
-      "Pumpkin soup with coconut and ginger.",
-      "Orange slices with a pinch of sea salt and water.",
-      "Coconut yogurt with mango for a soft, soothing snack.",
-    ],
-    stretches: [
-      "Gentle hip circles, 1–2 min.",
-      "Bound Angle pose, 60s with soft breath.",
-    ],
-    breath: "Wave breath to the belly, slow inhales/exhales.",
-    microPractices: [
-      "Drink a full glass of water with a squeeze of orange.",
-      "2-minute sway dance to loosen the hips.",
-    ],
-    energyInsight: "Permission to feel opens flow and creativity.",
-    crystals: ["Carnelian", "Sunstone", "Orange Calcite"],
-    crystalPlacements: [
-      "Carnelian 2–3 minutes on the lower belly while breathing.",
-      "Orange Calcite at the bath edge during a soak.",
-    ],
-    poses: ["Low Lunge", "Goddess", "Bridge"],
-    plantAllies: [
-      "Warming spices like cinnamon, cardamom, and ginger to invite circulation to the pelvis.",
-      "Sweet, softening herbs like chamomile or rose to melt tension in the belly.",
-      "Orange peel or rooibos blends that feel cozy and nurturing.",
-    ],
-    essentialOils: [
-      "Sweet orange or mandarin in a diffuser to invite play and flow.",
-      "Ylang ylang (well diluted) over the lower belly for sensual softness.",
-      "Clary sage during rest or creative time (avoid in pregnancy unless guided).",
-    ],
-  },
-  "Solar Plexus": {
-    color: "#FDD835",
-    mantra: "I act with confidence.",
-    foodsSentences: [
-      "Ginger tea with lemon before a task.",
-      "Brown rice bowl with sautéed greens and tahini.",
-      "Warm miso broth or digestive bitters before meals.",
-      "Turmeric rice with cumin for gentle fire.",
-    ],
-    stretches: [
-      "Cat-Cow x 6, focus on belly expansion.",
-      "Sphinx pose, 45–60s.",
-    ],
-    breath: "Kapalabhati (gentle set 30–50 pumps).",
-    microPractices: [
-      "Write one clear intention on a sticky note.",
-      "3 power-stands (30s each).",
-    ],
-    energyInsight: "Clarity grows when you choose one next step.",
-    crystals: ["Citrine", "Tiger's Eye", "Pyrite"],
-    crystalPlacements: [
-      "Citrine over the navel while visualizing a small sun.",
-      "Pyrite cube on your desk to anchor decisive action.",
-    ],
-    poses: ["Boat", "Plank", "Bow"],
-    plantAllies: [
-      "Digestive allies: ginger, peppermint, or fennel tea to support your inner fire.",
-      "Gentle bitters like dandelion leaf or artichoke (as appropriate) before heavier meals.",
-      "Lemon in warm water to cue the gut that it is time to wake up.",
-    ],
-    essentialOils: [
-      "Lemon or grapefruit in a diffuser for clean, focused brightness.",
-      "Ginger or black pepper (well diluted) over the upper belly for gentle fire.",
-      "Rosemary for clear, decisive mental energy (avoid with certain conditions).",
-    ],
-  },
-  Heart: {
-    color: "#43A047",
-    mantra: "I give and receive love.",
-    foodsSentences: [
-      "Leafy greens with avocado and a squeeze of lime.",
-      "Chamomile or lemon balm tea with honey.",
-      "Cacao with warm oat milk for soft, open energy.",
-      "Rose tea or hibiscus to soothe and brighten.",
-    ],
-    stretches: [
-      "Puppy pose, 45–60s.",
-      "Hands interlaced behind back, gentle lift 3 breaths.",
-    ],
-    breath: "Coherent breathing (5 in / 5 out, 3–5 min).",
-    microPractices: [
-      "Send one kind text you’ve been meaning to send.",
-      "Hand over heart, name 3 things you appreciate.",
-    ],
-    energyInsight: "Softening the chest invites ease into conversations.",
-    crystals: ["Rose Quartz", "Green Aventurine", "Malachite"],
-    crystalPlacements: [
-      "Rose Quartz at center chest for 2–3 minutes while breathing softly.",
-      "Green Aventurine under pillow for a soothing sleep tone.",
-    ],
-    poses: ["Camel (supported)", "Bridge", "Puppy"],
-    plantAllies: [
-      "Heart-soothing herbs like hawthorn, rose, or linden blossom (in tea or tincture form).",
-      "Bright, circulatory allies like hibiscus or cacao for warm, open-hearted focus.",
-      "Lavender or lemon balm to ease emotional tightness and invite gentleness.",
-    ],
-    essentialOils: [
-      "Rose absolute or rose geranium over the heart space (well diluted).",
-      "Lavender in a diffuser to soften edges and invite calm connection.",
-      "Bergamot for gentle uplift when the heart feels heavy.",
-    ],
-  },
-  Throat: {
-    color: "#1E88E5",
-    mantra: "I speak my truth clearly.",
-    foodsSentences: [
-      "Warm pear with a drizzle of raw honey.",
-      "Blueberry spinach smoothie with ginger.",
-      "Throat-soothing tea: ginger, honey, lemon.",
-      "Light soups and broths to soften jaw and throat.",
-    ],
-    stretches: [
-      "Neck side stretch, 20s each side.",
-      "Lion’s breath with gentle jaw release.",
-    ],
-    breath: "Humming exhale (mmm) for 1–2 minutes.",
-    microPractices: [
-      "Say the one line you’re avoiding, kindly and clearly.",
-      "Hum your favorite tune for 60 seconds.",
-    ],
-    energyInsight: "Clarity lands when sound and honesty meet.",
-    crystals: ["Aquamarine", "Blue Lace Agate", "Sodalite"],
-    crystalPlacements: [
-      "Blue Lace Agate at the throat while journaling one paragraph.",
-      "Aquamarine worn as a pendant during hard conversations.",
-    ],
-    poses: ["Fish (supported)", "Cat-Cow", "Shoulderstand (prep)"],
-    plantAllies: [
-      "Classic throat allies like licorice root, slippery elm, and marshmallow (as teas/lozenges).",
-      "Ginger with honey and lemon for warmth and clarity in the voice.",
-      "Peppermint or sage steam inhalation to clear and refresh, if it feels good for you.",
-    ],
-    essentialOils: [
-      "Peppermint in a diffuser or steam (not directly on the throat for sensitive skin).",
-      "Roman chamomile (diluted) on jaw and neck to release gripping.",
-      "Eucalyptus in a steam or diffuser to clear throat and chest space.",
-    ],
-  },
-  "Third Eye": {
-    color: "#5E35B1",
-    mantra: "I trust my inner sight.",
-    foodsSentences: [
-      "Purple cabbage slaw with sesame.",
-      "Blackberries with a square of dark cacao.",
-      "Calming tea: lavender + chamomile before bed.",
-      "Blue/purple foods for clarity (blueberries, black rice).",
-    ],
-    stretches: [
-      "Child’s pose, 60–90s.",
-      "Seated forward fold, soften the brow 5 breaths.",
-    ],
-    breath: "Alternate nostril breathing (Nadi Shodhana) 3–5 cycles.",
-    microPractices: [
-      "Close eyes for 30 seconds; notice 5 sounds.",
-      "Write the dream or symbol that keeps returning.",
-    ],
-    energyInsight: "Quiet attention sharpens your next wise move.",
-    crystals: ["Amethyst", "Lapis Lazuli", "Iolite"],
-    crystalPlacements: [
-      "Amethyst placed between brows while resting 2 minutes.",
-      "Lapis on the desk for clear thinking.",
-    ],
-    poses: ["Child's Pose", "Forward Fold", "Eagle (arms)"],
-    plantAllies: [
-      "Nervine allies like skullcap, chamomile, or oat tops for mental quiet.",
-      "Lavender or blue lotus (where legal and appropriate) for dreamy, intuitive states.",
-      "Simple, non-caffeinated evening teas to protect deep REM sleep.",
-    ],
-    essentialOils: [
-      "Frankincense in a diffuser for meditation and inner sight.",
-      "Lavender before bed to soften mental chatter.",
-      "Clary sage (well diluted) in ritual moments to support intuition.",
-    ],
-  },
-  Crown: {
-    color: "#9C27B0",
-    mantra: "I am connected.",
-    foodsSentences: [
-      "Mild mushroom broth with noodles.",
-      "Coconut yogurt with chia and a pinch of cinnamon.",
-      "Warm herbal infusions; avoid stimulants late.",
-      "Light, simple meals to support deep rest.",
-    ],
-    stretches: [
-      "Supine twist, 5 breaths each side.",
-      "Seated meditation posture check, lengthen crown.",
-    ],
-    breath: "Soft open breathing (count-free) 3 minutes.",
-    microPractices: [
-      "One quiet minute looking at the sky.",
-      "Note three moments of grace today.",
-    ],
-    energyInsight: "Spaciousness arrives when you let the mind widen.",
-    crystals: ["Clear Quartz", "Selenite", "Apophyllite"],
-    crystalPlacements: [
-      "Selenite above the head while seated for 60 seconds.",
-      "Clear Quartz by the window to brighten the room’s tone.",
-    ],
-    poses: ["Savasana", "Lotus (prep)", "Seated Meditation"],
-    plantAllies: [
-      "Light, clarifying herbs like gotu kola or tulsi (as appropriate) for gentle mental clarity.",
-      "Mugwort or milky oats in ritual quantities for dreamwork and spacious awareness.",
-      "Simple, caffeine-free evening infusions to support deep, restorative sleep.",
-    ],
-    essentialOils: [
-      "Frankincense or myrrh in a diffuser for spacious, prayerful energy.",
-      "High-quality lavender on pulse points (diluted) before sleep.",
-      "A simple blend of frankincense + lavender during meditation.",
-    ],
-  },
-};
 
-const bodyAreaToChakra: Record<BodyArea, Chakra> = {
-  head: "Third Eye",
-  throat: "Throat",
-  chest: "Heart",
-  solar_plexus: "Solar Plexus",
-  belly: "Sacral",
-  hips: "Root",
-  legs: "Root",
-  feet: "Root",
-};
-
-const AREA_LABELS: Record<BodyArea, string> = {
-  head: "Head",
-  throat: "Throat",
-  chest: "Chest",
-  solar_plexus: "Solar Plexus",
-  belly: "Belly",
-  hips: "Hips",
-  legs: "Legs",
-  feet: "Feet",
-};
-
-/* ------------------------- Glow helpers / UI ------------------------- */
-
-function GlowButton({
-  children,
-  className = "",
-  ...props
-}: React.ComponentProps<typeof Button>) {
   return (
-    <div className="inline-flex rounded-full bg-gradient-to-br from-fuchsia-400 via-violet-400 to-sky-400 p-[1px] shadow-lg shadow-violet-500/30">
-      <Button
-        {...props}
-        className={
-          "rounded-full bg-slate-950/95 px-4 py-2 text-xs sm:text-sm font-medium text-slate-50 hover:bg-slate-900 " +
-          className
-        }
-      >
-        {children}
-      </Button>
-    </div>
+    "Your system is asking for softness over performance today. Instead of fixing every sensation, try staying close to one: your breath, the weight of your body, or the feeling of your feet on the floor. Let your nervous system set the pace — your clarity will follow."
   );
 }
 
-function Pill({
-  active,
-  children,
-  onClick,
-}: {
-  active?: boolean;
-  children: React.ReactNode;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      aria-pressed={active}
-      className={`relative inline-flex items-center justify-center text-xs sm:text-sm font-medium transition-transform ${
-        active ? "scale-[1.04]" : "hover:scale-[1.02]"
-      }`}
-    >
-      <span
-        className={`inline-flex rounded-full p-[1px] shadow-lg ${
-          active
-            ? "bg-gradient-to-br from-fuchsia-400 via-violet-400 to-sky-400 shadow-violet-500/70"
-            : "bg-slate-700/60 shadow-slate-900/40"
-        }`}
-      >
-        <span
-          className={`inline-flex min-w-[4.5rem] items-center justify-center rounded-full px-3 py-1.5 ${
-            active
-              ? "bg-slate-900 text-slate-50"
-              : "bg-slate-950/90 text-slate-200"
-          }`}
-        >
-          {children}
-        </span>
-      </span>
-    </button>
-  );
-}
-
-function ColorDot({ color }: { color: string }) {
-  return (
-    <span
-      className="mr-2 inline-block h-3 w-3 rounded-full align-middle"
-      style={{ backgroundColor: color }}
-    />
-  );
-}
-
-/** Generic uniq that preserves element type (fixes Chakra typing) */
-const uniq = <T,>(arr: T[]) => Array.from(new Set(arr));
-
-type PlanDay = { day: number; morning: string[]; night: string[] };
-
-/* ---------------------- Biometrics scoring + demo ---------------------- */
-
-function scoreChakrasFromBiometrics(b: Biometrics) {
-  const scores: Record<Chakra, number> = {
-    Root: 0,
-    Sacral: 0,
-    "Solar Plexus": 0,
-    Heart: 0,
-    Throat: 0,
-    "Third Eye": 0,
-    Crown: 0,
-  };
-  const why: string[] = [];
-  if (b.hrv < 35) {
-    scores.Root += 2;
-    why.push("Low HRV → grounding needed");
-  }
-  if (b.rhr > 70) {
-    scores.Root += 1;
-    why.push("Elevated resting HR → stabilize");
-  }
-  if (b.stress > 65) {
-    scores.Root += 1;
-    scores.Heart += 1;
-    why.push("High stress → Root/Heart support");
-  }
-  if (b.steps < 3000) {
-    scores.Root += 1;
-    why.push("Low movement → earth & legs");
-  }
-  if (b.respRate > 18) {
-    scores["Solar Plexus"] += 1;
-    why.push("Fast breathing → core regulation");
-  }
-  if (b.deepPct < 12) {
-    scores.Heart += 1;
-    why.push("Low deep sleep → coherence");
-  }
-  if (b.respRate > 17 && b.stress > 50) {
-    scores.Throat += 1;
-    why.push("Breath/voice tension → throat softening");
-  }
-  if (b.remPct < 18 || b.sleepHours < 6) {
-    scores["Third Eye"] += 2;
-    why.push("REM or sleep low → inner sight rest");
-  }
-  if (b.skinTempDelta > 0.6) {
-    scores.Crown += 1;
-    why.push("Temp up → rest & spaciousness");
-  }
-  if (b.sleepHours < 5.5) {
-    scores.Crown += 1;
-  }
-  const top = (Object.keys(scores) as Chakra[]).sort(
-    (a, bKey) => scores[bKey] - scores[a]
-  )[0] as Chakra;
-  return { scores, top, why };
-}
-
-async function fetchBiometricsDemo(): Promise<Biometrics> {
-  return {
-    rhr: 72,
-    hrv: 29,
-    sleepHours: 5.8,
-    remPct: 16,
-    deepPct: 11,
-    respRate: 19,
-    skinTempDelta: 0.2,
-    stress: 68,
-    steps: 2140,
-  };
-}
-
-/* --------------------------------- Page --------------------------------- */
+/* ──────────────────────────────────────────────────────────────
+ * Page
+ * ────────────────────────────────────────────────────────────── */
 
 export default function InsightsPage() {
-  // Manual selection
-  const [selectedAreas, setSelectedAreas] = useState<BodyArea[]>([]);
+  const [insight, setInsight] = useState<string>("Loading your insight…");
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Biometrics/auto
-  const [connected, setConnected] = useState(false);
-  const [providers, setProviders] = useState<string[]>([]);
-  const [bio, setBio] = useState<Biometrics | null>(null);
-  const [autoChakra, setAutoChakra] = useState<Chakra | null>(null);
-  const [useAuto, setUseAuto] = useState(true);
-  const [loadingBio, setLoadingBio] = useState(false);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      const text = await fetchBodyInsight();
+      if (mounted) {
+        setInsight(text);
+        setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-  // Plan
-  const [plan, setPlan] = useState<PlanDay[] | null>(null);
-  const planRef = useRef<HTMLDivElement | null>(null);
-
-  const selectedChakrasFromAreas = useMemo(() => {
-    const list = Array.from(
-      new Set(selectedAreas.map((a) => bodyAreaToChakra[a]))
-    );
-    return list as Chakra[];
-  }, [selectedAreas]);
-
-  const activeChakras = useMemo<Chakra[]>(() => {
-    return useAuto && autoChakra
-      ? uniq<Chakra>([autoChakra, ...selectedChakrasFromAreas])
-      : selectedChakrasFromAreas;
-  }, [useAuto, autoChakra, selectedChakrasFromAreas]);
-
-  const foodsSentences = useMemo(
-    () => uniq<string>(activeChakras.flatMap((c) => RECS[c].foodsSentences)),
-    [activeChakras]
-  );
-  const stretches = useMemo(
-    () => uniq<string>(activeChakras.flatMap((c) => RECS[c].stretches)),
-    [activeChakras]
-  );
-  const microPractices = useMemo(
-    () => uniq<string>(activeChakras.flatMap((c) => RECS[c].microPractices)),
-    [activeChakras]
-  );
-  const crystalPlacements = useMemo(
-    () => uniq<string>(activeChakras.flatMap((c) => RECS[c].crystalPlacements)),
-    [activeChakras]
-  );
-  const crystals = useMemo(
-    () => uniq<string>(activeChakras.flatMap((c) => RECS[c].crystals)),
-    [activeChakras]
-  );
-  const plantAllies = useMemo(
-    () => uniq<string>(activeChakras.flatMap((c) => RECS[c].plantAllies)),
-    [activeChakras]
-  );
-  const essentialOils = useMemo(
-    () => uniq<string>(activeChakras.flatMap((c) => RECS[c].essentialOils)),
-    [activeChakras]
-  );
-
-  const primaryKey: Chakra =
-    (useAuto && autoChakra) || activeChakras[0] || "Heart";
-
-  const morningBase = useMemo(() => {
-    const r = RECS[primaryKey];
-    return [
-      r.stretches[0] ?? "Gentle spinal twists in bed.",
-      r.breath,
-      `Mantra: "${r.mantra}"`,
-      r.microPractices[0] ?? "One tiny kindness before phone.",
-    ];
-  }, [primaryKey]);
-
-  const nightBase = useMemo(() => {
-    const r = RECS[primaryKey];
-    return [
-      "Cat-cow x 6 + knees-to-chest.",
-      r.stretches[1] ?? "Supported forward fold (2 min).",
-      r.breath,
-      "1-sentence journal: ‘One thing I release…’.",
-    ];
-  }, [primaryKey]);
-
-  const generateTwoWeekPlan = () => {
-    const days: PlanDay[] = Array.from({ length: 14 }, (_, i) => ({
-      day: i + 1,
-      morning: [
-        morningBase[i % morningBase.length],
-        morningBase[(i + 1) % morningBase.length],
-      ],
-      night: [
-        nightBase[i % nightBase.length],
-        nightBase[(i + 1) % nightBase.length],
-      ],
-    }));
-    setPlan(days);
-    setTimeout(
-      () =>
-        planRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-      0
-    );
-  };
-
-  const toggleArea = (area: BodyArea) => {
-    setSelectedAreas((prev) =>
-      prev.includes(area) ? prev.filter((a) => a !== area) : [...prev, area]
-    );
-  };
-
-  // Sample/demo connection (while real wearables are being wired up)
-  const handleSampleData = async () => {
-    setLoadingBio(true);
-    try {
-      const data = await fetchBiometricsDemo();
-      setBio(data);
-      const { top } = scoreChakrasFromBiometrics(data);
-      setAutoChakra(top);
-      setConnected(true);
-      setProviders(["Sample data"]);
-    } finally {
-      setLoadingBio(false);
-    }
-  };
-
-  const refreshBiometrics = async () => {
-    setLoadingBio(true);
-    try {
-      const data = await fetchBiometricsDemo();
-      setBio(data);
-      const { top } = scoreChakrasFromBiometrics(data);
-      setAutoChakra(top);
-    } finally {
-      setLoadingBio(false);
-    }
-  };
-
-  const bioScore = useMemo(
-    () => (bio ? scoreChakrasFromBiometrics(bio) : null),
-    [bio]
+  const todayStr = useMemo(
+    () =>
+      new Date().toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+      }),
+    []
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-100">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-20 pt-8 md:px-8">
-        {/* Header to match Play page vibe */}
-        <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-slate-100">
+      {/* soft cosmic background */}
+      <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
+        <div className="h-[130vh] w-[130vh] rounded-full bg-[radial-gradient(circle_at_center,_rgba(129,140,248,0.3),_rgba(244,114,182,0.28),_rgba(56,189,248,0.15),_transparent_70%)] blur-3xl" />
+      </div>
+      <div className="pointer-events-none absolute -left-32 top-0 -z-10 h-72 w-72 rounded-full bg-fuchsia-500/18 blur-3xl" />
+      <div className="pointer-events-none absolute -right-20 bottom-10 -z-10 h-80 w-80 rounded-full bg-sky-500/18 blur-3xl" />
+
+      <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-4 pb-20 pt-8 md:px-8">
+        {/* Header */}
+        <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-slate-500">
-              Biometrics
-            </p>
-            <h1 className="text-2xl font-semibold text-slate-50 md:text-3xl">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.25em] text-slate-500">
               Body Insights
+            </p>
+            <h1 className="mt-1 flex flex-wrap items-baseline gap-2 text-2xl font-semibold text-slate-50 md:text-3xl">
+              Your Field Today
+              <span className="text-xs font-normal uppercase tracking-[0.2em] text-slate-400">
+                • {todayStr}
+              </span>
             </h1>
             <p className="mt-2 max-w-xl text-sm text-slate-300">
-              Translate your heart rate, sleep, and body sensations into
-              grounded micro-practices, food, plants, crystals, and breathwork.
+              A luxury check-in for your body, chakras, and nervous system —
+              translated into tiny, livable adjustments instead of perfection
+              projects.
             </p>
           </div>
 
-          <div className="mt-2 text-right md:mt-0">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-              From Within
-            </p>
-            <p className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-sky-300 bg-clip-text text-sm font-semibold text-transparent">
-              Body · Breath · Energy
+          <div className="space-y-2 text-right">
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-700/70 bg-slate-950/80 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-slate-300">
+              <Sparkles className="h-3.5 w-3.5 text-fuchsia-300" />
+              Nervous-System First
+            </span>
+            <p className="text-xs text-slate-500">
+              Pair this with the{" "}
+              <Link
+                href="/energy/today"
+                className="text-sky-300 underline-offset-2 hover:underline"
+              >
+                Today
+              </Link>{" "}
+              page for a full energy snapshot.
             </p>
           </div>
         </header>
 
-        {/* Biometrics (Auto-Insights) */}
-        <Card className="relative mb-2 overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 shadow-xl">
+        {/* AI insight card */}
+        <section className="group relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/85 p-6 shadow-xl shadow-slate-950/80">
           <div className="pointer-events-none absolute -left-16 top-0 h-40 w-40 rounded-full bg-fuchsia-500/10 blur-3xl" />
           <div className="pointer-events-none absolute -right-10 bottom-0 h-40 w-40 rounded-full bg-sky-500/10 blur-3xl" />
-
-          <div className="relative z-10">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-50">
-                <Watch className="h-4 w-4 text-sky-300" /> Biometrics
-                (Auto-Insights)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 pt-0">
-              {!connected ? (
-                <>
-                  <p className="text-sm text-slate-300">
-                    Connect a wearable to auto-detect today’s focus chakra and
-                    get instant guidance. Or preview how it works with sample
-                    biometric data.
-                  </p>
-
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-                    {/* Real connection (OAuth via ConnectWearable) */}
-                    <div className="flex-1">
-                      <ConnectWearable />
-                    </div>
-
-                    {/* Sample/demo data */}
-                    <GlowButton
-                      onClick={handleSampleData}
-                      className="w-full sm:w-auto"
-                    >
-                      <Sparkles className="mr-1 h-4 w-4" />
-                      Try with sample data
-                    </GlowButton>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge className="rounded-full bg-slate-900/80 text-xs text-slate-100">
-                      Connected: {providers.join(", ")}
-                    </Badge>
-                    <Badge className="rounded-full bg-slate-900/80 text-xs text-slate-100">
-                      <HeartPulse className="mr-1 h-3 w-3" /> RHR {bio?.rhr} bpm
-                      · HRV {bio?.hrv} ms
-                    </Badge>
-                    <Badge
-                      variant="secondary"
-                      className="rounded-full bg-slate-900/80 text-xs text-slate-100"
-                    >
-                      <Moon className="mr-1 h-3 w-3" /> Sleep {bio?.sleepHours}
-                      h · REM {bio?.remPct}% · Deep {bio?.deepPct}%
-                    </Badge>
-                    <Badge
-                      variant="secondary"
-                      className="rounded-full bg-slate-900/80 text-xs text-slate-100"
-                    >
-                      <Gauge className="mr-1 h-3 w-3" /> Resp {bio?.respRate}/
-                      min · Temp {bio?.skinTempDelta.toFixed(1)}°C
-                    </Badge>
-                    <Badge
-                      variant="secondary"
-                      className="rounded-full bg-slate-900/80 text-xs text-slate-100"
-                    >
-                      <Brain className="mr-1 h-3 w-3" /> Stress {bio?.stress}
-                      /100 · Steps {bio?.steps}
-                    </Badge>
-                    <div className="ml-auto">
-                      <GlowButton
-                        size="sm"
-                        variant="ghost"
-                        onClick={refreshBiometrics}
-                        className="px-3 py-1 text-xs"
-                      >
-                        <RefreshCw className="mr-1 h-4 w-4" />
-                        {loadingBio ? "Refreshing…" : "Refresh"}
-                      </GlowButton>
-                    </div>
-                  </div>
-
-                  {bioScore && (
-                    <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
-                      <div className="mb-1 flex items-center gap-2">
-                        <div className="text-xs font-medium text-slate-300">
-                          Auto Focus:
-                        </div>
-                        <span className="text-xs font-semibold text-slate-100">
-                          <ColorDot color={RECS[bioScore.top].color} />{" "}
-                          {bioScore.top}
-                        </span>
-                        <div className="ml-auto">
-                          <GlowButton
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setUseAuto((v) => !v)}
-                            className="px-3 py-1 text-[11px]"
-                          >
-                            {useAuto ? "Using Auto Insights" : "Use Auto"}
-                          </GlowButton>
-                        </div>
-                      </div>
-                      <ul className="mt-1 list-disc space-y-1 pl-6 text-xs text-slate-300">
-                        {bioScore.why.map((w) => (
-                          <li key={w}>{w}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </>
-              )}
-            </CardContent>
-          </div>
-        </Card>
-
-        {/* Manual Body Area Selector */}
-        <Card className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 shadow-xl">
-          <div className="pointer-events-none absolute -left-14 top-0 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl" />
-          <div className="pointer-events-none absolute -right-10 bottom-0 h-32 w-32 rounded-full bg-sky-500/10 blur-3xl" />
-
-          <div className="relative z-10">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-50">
-                <Activity className="h-4 w-4 text-emerald-300" /> Select where
-                you feel it in your body
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {(Object.keys(AREA_LABELS) as BodyArea[]).map((area) => (
-                  <Pill
-                    key={area}
-                    active={selectedAreas.includes(area)}
-                    onClick={() => toggleArea(area)}
-                  >
-                    {AREA_LABELS[area]}
-                  </Pill>
-                ))}
-              </div>
-              <p className="mt-3 text-xs text-slate-400">
-                Tip: you can select more than one area.
-              </p>
-            </CardContent>
-          </div>
-        </Card>
-
-        {/* Recommendations */}
-        {activeChakras.length === 0 ? (
-          <Card className="mt-2 rounded-3xl border border-slate-800 bg-slate-950/80 shadow-xl">
-            <CardContent className="py-10 text-center text-slate-300">
-              <div className="mx-auto mb-3 grid h-10 w-10 place-items-center rounded-full bg-slate-900">
-                <Sparkles className="h-5 w-5 text-violet-200" />
-              </div>
-              <p className="text-sm">
-                Connect your wearable or select an area above to see stretches,
-                breathwork, micro-practices, food, plant allies, crystals, and
-                a personalized plan.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="mt-2 space-y-6">
-            {activeChakras.map((c) => (
-              <Card
-                key={c}
-                className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 shadow-xl"
-              >
-                <div className="pointer-events-none absolute -left-16 top-0 h-40 w-40 rounded-full bg-violet-500/10 blur-3xl" />
-                <div className="pointer-events-none absolute -right-10 bottom-0 h-40 w-40 rounded-full bg-sky-500/10 blur-3xl" />
-
-                <div className="relative z-10">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-50">
-                      <ColorDot color={RECS[c].color} /> {c}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4 pt-0 text-sm text-slate-200">
-                    <div className="flex items-start gap-2">
-                      <div className="mt-0.5">
-                        <Wind className="h-4 w-4 text-sky-200" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium">Breath</div>
-                        <div className="text-slate-200">{RECS[c].breath}</div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="mb-1 flex items-center gap-2 font-medium">
-                        <Activity className="h-4 w-4 text-emerald-200" />{" "}
-                        Stretches
-                      </div>
-                      <ul className="list-disc space-y-1 pl-6 text-slate-200">
-                        {RECS[c].stretches.map((s) => (
-                          <li key={s}>{s}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div>
-                      <div className="mb-1 flex items-center gap-2 font-medium">
-                        <Sparkles className="h-4 w-4 text-fuchsia-200" />{" "}
-                        Micro-practices
-                      </div>
-                      <ul className="list-disc space-y-1 pl-6 text-slate-200">
-                        {RECS[c].microPractices.map((m) => (
-                          <li key={m}>{m}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="text-slate-200">
-                      <span className="font-medium">Energy insight:</span>{" "}
-                      {RECS[c].energyInsight}
-                    </div>
-
-                    <div>
-                      <div className="mb-1 flex items-center gap-2 font-medium">
-                        <Gem className="h-4 w-4 text-amber-200" /> Crystals &
-                        Placements
-                      </div>
-                      <div className="mb-2 flex flex-wrap gap-2">
-                        {crystals.map((name) => (
-                          <Badge
-                            key={`${c}-${name}`}
-                            variant="secondary"
-                            className="rounded-full bg-slate-900/80 px-3 py-1 text-xs text-slate-100"
-                          >
-                            {name}
-                          </Badge>
-                        ))}
-                      </div>
-                      <ul className="list-disc space-y-1 pl-6 text-slate-200">
-                        {crystalPlacements.map((p) => (
-                          <li key={`${c}-${p}`}>{p}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </CardContent>
+          <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-400 via-violet-400 to-sky-400 p-[2px] shadow-lg shadow-violet-500/50">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950">
+                  <Brain className="h-5 w-5 text-slate-50" />
                 </div>
-              </Card>
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-200">
+                  Insight Of The Moment
+                </h2>
+                <p className="mt-1 text-xs text-slate-400">
+                  AI-assisted, but always in service of your inner voice.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-2 flex-1 space-y-3 text-sm text-slate-100 md:mt-0">
+              <p className="whitespace-pre-line leading-relaxed">{insight}</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link href="/checkin" className="group inline-flex">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-fuchsia-400 via-violet-400 to-sky-400 p-[2px] shadow-lg shadow-violet-500/40 transition group-hover:shadow-violet-400/70">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-slate-950/95 px-4 py-2 text-xs font-medium text-slate-50">
+                      <Activity className="h-3.5 w-3.5" />
+                      Log how your body feels
+                    </span>
+                  </span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setLoading(true);
+                    const text = await fetchBodyInsight();
+                    setInsight(text);
+                    setLoading(false);
+                  }}
+                  className="text-[11px] text-sky-300 underline-offset-2 hover:underline"
+                >
+                  {loading ? "Refreshing…" : "New insight"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Chakra grid */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300">
+                Chakra Body Map
+              </h2>
+              <p className="mt-1 text-xs text-slate-400">
+                Use this as a menu, not a to-do list. Start where your body is
+                already talking.
+              </p>
+            </div>
+            <div className="hidden text-right text-[11px] text-slate-500 md:block">
+              <p>Notice where you feel heavy, tight, buzzy, or numb.</p>
+              <p>Pick one card below and try the micro-ritual.</p>
+            </div>
+          </div>
+
+          <div className="mt-2 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {CHAKRAS.map((c) => (
+              <article
+                key={c.id}
+                className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/85 p-4 text-sm shadow-lg shadow-slate-950/70 transition hover:-translate-y-0.5 hover:border-violet-500/60"
+              >
+                <div
+                  className={`pointer-events-none absolute inset-x-10 top-0 h-24 rounded-full bg-gradient-to-r ${c.color} opacity-25 blur-3xl`}
+                />
+                <div className="relative z-10 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-[13px] font-semibold text-slate-50">
+                        {c.name}
+                      </h3>
+                      <p className="text-[11px] text-slate-400">{c.focus}</p>
+                    </div>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/80 ring-1 ring-slate-700/80">
+                      <Gem className="h-4 w-4 text-slate-100" />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Body focus: {c.body}
+                  </p>
+                  <p className="text-xs leading-relaxed text-slate-200">
+                    {c.micro}
+                  </p>
+                </div>
+              </article>
             ))}
-
-            {/* Food as Medicine */}
-            <Card className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 shadow-xl">
-              <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-amber-500/10 blur-3xl" />
-              <div className="pointer-events-none absolute -right-8 bottom-0 h-32 w-32 rounded-full bg-rose-500/10 blur-3xl" />
-
-              <div className="relative z-10">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-50">
-                    <Soup className="h-4 w-4 text-amber-200" /> Food as Medicine
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 pt-0">
-                  <p className="text-sm text-slate-300">
-                    Suggestions tuned to your current focus. Try simple meals,
-                    drinks, snacks, and remedies that support healing.
-                  </p>
-                  <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3">
-                    <div className="mb-1 text-sm font-medium text-amber-100">
-                      Suggested for you
-                    </div>
-                    <ul className="list-disc space-y-1 pl-6 text-xs text-amber-50">
-                      {foodsSentences.length > 0 ? (
-                        foodsSentences.map((s) => <li key={s}>{s}</li>)
-                      ) : (
-                        <>
-                          <li>
-                            Start with warm, easy-to-digest foods and calming
-                            teas.
-                          </li>
-                          <li>
-                            Favor mineral-rich broths and gentle spices (ginger,
-                            cinnamon).
-                          </li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
-                </CardContent>
-              </div>
-            </Card>
-
-            {/* Plant Allies & Essential Oils */}
-            <Card className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 shadow-xl">
-              <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl" />
-              <div className="pointer-events-none absolute -right-8 bottom-0 h-32 w-32 rounded-full bg-sky-500/10 blur-3xl" />
-
-              <div className="relative z-10">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-50">
-                    <Flower2 className="h-4 w-4 text-emerald-200" /> Plant
-                    Allies & Essential Oils
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 pt-0">
-                  <p className="text-sm text-slate-300">
-                    Gentle plant and aromatic allies that harmonize with your
-                    current chakra focus. Always listen to your body and check
-                    with your practitioners where needed.
-                  </p>
-
-                  <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-                    <div className="mb-1 text-sm font-medium text-emerald-100">
-                      Suggested plant allies
-                    </div>
-                    <ul className="list-disc space-y-1 pl-6 text-xs text-emerald-50">
-                      {plantAllies.length > 0 ? (
-                        plantAllies.map((s) => <li key={s}>{s}</li>)
-                      ) : (
-                        <>
-                          <li>
-                            Begin with simple, single-herb teas like chamomile,
-                            peppermint, or tulsi.
-                          </li>
-                          <li>
-                            Notice how your body responds over a few days before
-                            layering more complexity.
-                          </li>
-                        </>
-                      )}
-                    </ul>
-
-                    {essentialOils.length > 0 && (
-                      <div className="mt-3">
-                        <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-emerald-100/90">
-                          <Droplets className="h-3 w-3 text-emerald-100" />
-                          Essential oils to explore
-                        </div>
-                        <ul className="list-disc space-y-1 pl-6 text-[11px] text-emerald-50">
-                          {essentialOils.map((oil) => (
-                            <li key={oil}>{oil}</li>
-                          ))}
-                        </ul>
-                        <p className="mt-1 text-[10px] text-emerald-100/80">
-                          Always dilute essential oils properly and patch-test
-                          first. Avoid internal use or undiluted application
-                          unless guided by a qualified practitioner.
-                        </p>
-                      </div>
-                    )}
-
-                    <p className="mt-2 text-[10px] text-emerald-100/80">
-                      These are educational suggestions and not medical advice.
-                      Check in with your healthcare provider where needed.
-                    </p>
-                  </div>
-                </CardContent>
-              </div>
-            </Card>
-
-            {/* Personalized Plan */}
-            <Card className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 shadow-xl">
-              <div className="pointer-events-none absolute -left-12 top-0 h-32 w-32 rounded-full bg-violet-500/10 blur-3xl" />
-              <div className="pointer-events-none absolute -right-10 bottom-0 h-32 w-32 rounded-full bg-sky-500/10 blur-3xl" />
-
-              <div className="relative z-10">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-50">
-                    <Sun className="h-4 w-4 text-amber-200" /> Personalized Plan
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="mb-3 text-sm text-slate-300">
-                    Build a 14-day micro-practice plan from your connected
-                    biometrics and any areas you selected.
-                  </p>
-                  <GlowButton
-                    onClick={generateTwoWeekPlan}
-                    disabled={activeChakras.length === 0}
-                    className="disabled:opacity-40"
-                  >
-                    Generate 2-week plan
-                  </GlowButton>
-                </CardContent>
-              </div>
-            </Card>
-
-            {/* 2-week plan render */}
-            {plan && (
-              <Card
-                ref={planRef}
-                className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 shadow-xl"
-              >
-                <div className="pointer-events-none absolute -left-10 top-0 h-32 w-32 rounded-full bg-rose-500/10 blur-3xl" />
-                <div className="pointer-events-none absolute -right-8 bottom-0 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl" />
-
-                <div className="relative z-10">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-50">
-                      <Moon className="h-4 w-4 text-sky-200" /> Your 2-week
-                      micro-plan
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {plan.map((d) => (
-                        <div
-                          key={d.day}
-                          className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3 text-xs text-slate-200"
-                        >
-                          <div className="mb-1 text-sm font-medium">
-                            Day {d.day}
-                          </div>
-                          <div>
-                            <div className="mb-1 flex items-center gap-2 font-medium text-slate-100">
-                              <Sun className="h-4 w-4 text-amber-200" />{" "}
-                              Morning
-                            </div>
-                            <ul className="list-disc space-y-1 pl-6">
-                              {d.morning.map((it, i) => (
-                                <li key={`m-${d.day}-${i}`}>{it}</li>
-                              ))}
-                            </ul>
-                            <div className="mt-2 mb-1 flex items-center gap-2 font-medium text-slate-100">
-                              <Moon className="h-4 w-4 text-sky-200" /> Night
-                            </div>
-                            <ul className="list-disc space-y-1 pl-6">
-                              {d.night.map((it, i) => (
-                                <li key={`n-${d.day}-${i}`}>{it}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </div>
-              </Card>
-            )}
           </div>
-        )}
+        </section>
+
+        {/* Gentle footer links */}
+        <section className="mt-4 flex flex-wrap gap-3 text-[11px] md:text-xs">
+          <Link
+            href="/morning"
+            className="inline-flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-950/85 px-3 py-1 text-slate-200 hover:border-violet-400/80 hover:text-slate-50"
+          >
+            <Sun className="h-3.5 w-3.5" />
+            Morning Ritual
+            <ArrowRight className="h-3 w-3" />
+          </Link>
+          <Link
+            href="/energy/month"
+            className="inline-flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-950/85 px-3 py-1 text-slate-200 hover:border-sky-400/80 hover:text-slate-50"
+          >
+            <Moon className="h-3.5 w-3.5" />
+            Energy Calendar
+            <ArrowRight className="h-3 w-3" />
+          </Link>
+          <span className="inline-flex items-center gap-1 rounded-full border border-slate-800/80 bg-slate-950/85 px-3 py-1 text-slate-400">
+            <Info className="h-3.5 w-3.5" />
+            Educational, not medical advice. Always listen to your care team and
+            your own body.
+          </span>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "FromWithin",
+    "slug": "fromwithin",
+    "scheme": "fromwithin",
+    "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#020617"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.fromwithin.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.fromwithin.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#020617"
+      }
+    },
+    "plugins": [
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "FromWithin uses your Apple Watch data (HRV, sleep, heart rate, breaths per minute, steps, menstrual cycle) to give you personalized healing and wellness insights.",
+          "NSHealthUpdateUsageDescription": "FromWithin can log mindfulness minutes to help you track your rituals and meditations over time.",
+          "background": true
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "9b0527c0-22b7-4cfb-9f08-abe395917ab8"
+      }
+    }
+  }
+}

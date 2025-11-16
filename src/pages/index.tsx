@@ -11,66 +11,49 @@ const MORNING_SEEN_KEY = "gw_morning_seen_date";
 
 // Morning window (local time) – kept for future nudges
 const MORNING_START_HOUR = 4; // 4 AM
-const MORNING_END_HOUR = 11;  // 11 AM (non-inclusive)
+const MORNING_END_HOUR = 11; // 11 AM (non-inclusive)
 
 export default function HomePage() {
   const router = useRouter();
 
+  // NEW: 5-core-path layout instead of 9 separate tiles
   const tiles = [
     {
-      href: "/morning",
-      title: "Morning Ritual",
-      description: "Stretches, breath, and nourishment.",
+      href: "/today", // we'll create this page as the merged Morning + Check-In
+      title: "Today",
+      description: "Your energy, check-in, and rituals.",
       icon: "☀️",
     },
     {
-      href: "/checkin",
-      title: "Check-In",
-      description: "Log mood, notes, voice.",
-      icon: "🜃",
-    },
-    {
-      href: "/mentor",
-      title: "Mentor",
-      description: "AI companion & guidance.",
-      icon: "☪︎",
+      href: "/guide", // hub for Mentor + Tarot
+      title: "Guide",
+      description: "Mentor, tarot, and soul-level guidance.",
+      icon: "✨",
     },
     {
       href: "/insights",
       title: "Insights",
-      description: "Body & energy guidance.",
+      description: "Trends across body, mood, and moon.",
       icon: "〰️",
     },
     {
       href: "/community",
       title: "Community",
-      description: "Share & join events.",
+      description: "Share, join events, and connect.",
       icon: "ૐ",
     },
     {
-      href: "/tarot",
-      title: "Tarot",
-      description: "Daily pulls & spreads.",
-      icon: "🀧",
-    },
-    {
-      href: "/learning",
-      title: "Learning",
-      description: "Chakras, Reiki, crystals.",
-      icon: "𓂀",
-    },
-    {
-      href: "/energy-calendar",
-      title: "Energy Calendar",
-      description: "Lunar & cosmic rhythms.",
-      icon: "𖦹",
-    },
-    {
-      href: "/play",
-      title: "Play",
-      description: "Quests, grids, fun.",
+      href: "/studio", // hub for Play + Learning + tools
+      title: "Studio",
+      description: "Play, learn, and create with energy tools.",
       icon: "𓀪",
     },
+    {
+      href: "/beta-feedback",
+      title: "Beta Feedback",
+      description: "Report bugs, confusion, or ideas directly to Anna.",
+      icon: "🧪",
+    },    
   ];
 
   // Onboarding redirect ONLY – no auto-morning redirect for beta
@@ -144,7 +127,7 @@ export default function HomePage() {
               onClick={handleResetOrientation}
               className="text-[11px] text-slate-300 underline-offset-4 hover:text-slate-50 hover:underline"
             >
-              Reset intro & guidance
+              Reset intro &amp; guidance
             </button>
           </div>
 

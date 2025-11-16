@@ -1,168 +1,97 @@
 // src/components/ConnectWearable.tsx
 "use client";
 
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Watch, Activity, MoonStar, Smartphone } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import React, { useEffect, useState } from "react";
+import { Watch, Activity, HeartPulse, Moon } from "lucide-react";
 
-type ProviderKey = "fitbit" | "oura" | "apple_health" | "google_fit";
+type Provider = "fitbit" | "oura" | "googlefit";
 
-type ProviderConfig = {
-  key: ProviderKey;
-  label: string;
-  description: string;
-  icon: React.ReactNode;
-  available: boolean;
-};
+const COOKIE_KEY = "gw_wearable_connected";
 
-const PROVIDERS: ProviderConfig[] = [
-  {
-    key: "fitbit",
-    label: "Fitbit",
-    description: "Sync heart rate, HRV, steps, and movement.",
-    icon: <Activity className="h-4 w-4" />,
-    available: true, // wired via /api/wearables/fitbit/*
-  },
-  {
-    key: "oura",
-    label: "Oura Ring",
-    description: "Deep sleep + HRV insights for nervous system balance.",
-    icon: <MoonStar className="h-4 w-4" />,
-    available: true, // wired via /api/wearables/oura/*
-  },
-  {
-    key: "google_fit",
-    label: "Google Fit / Android",
-    description: "Connect Android-based health data (HR, sleep, activity).",
-    icon: <Smartphone className="h-4 w-4" />,
-    available: true, // wired via /api/wearables/google_fit/*
-  },
-  {
-    key: "apple_health",
-    label: "Apple Health / Apple Watch",
-    description: "Coming soon – sync data from your iPhone and Apple Watch.",
-    icon: <Watch className="h-4 w-4" />,
-    available: false, // future native HealthKit integration
-  },
-];
+/** Check if any wearable has been connected (cookie set by the OAuth callback) */
+function hasWearableCookie(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie.split("; ").some((c) => c.startsWith(`${COOKIE_KEY}=1`));
+}
 
-export const ConnectWearable: React.FC = () => {
-  const [isOpening, setIsOpening] = useState<ProviderKey | null>(null);
+/** Send the browser into the OAuth flow for the given provider */
+function startOAuth(provider: Provider) {
+  if (typeof window === "undefined") return;
+  // Full page navigation so the 307 redirect → provider works correctly
+  window.location.href = `/api/oauth/${provider}/start`;
+}
 
-  const handleConnect = (provider: ProviderKey, available: boolean) => {
-    if (!available) {
-      alert(
-        "Apple Health / Apple Watch syncing is coming in a later update.\n\nFor now, you can connect Fitbit, Oura, or Google Fit."
-      );
-      return;
-    }
-  
-    setIsOpening(provider);
-  
-    if (provider === "fitbit") {
-      window.location.href = "/api/wearables/fitbit/auth";
-    } else if (provider === "oura") {
-      window.location.href = "/api/wearables/oura/auth";
-    } else if (provider === "google_fit") {
-      window.location.href = "/api/wearables/google_fit/auth";
-    }
-    // apple_health will be handled by the native iOS app later
-  };  
+export default function ConnectWearable() {
+  const [connected, setConnected] = useState(false);
+  const [loading, setLoading] = useState<Provider | null>(null);
 
-  const openingLabel =
-    isOpening === "fitbit"
-      ? "Fitbit"
-      : isOpening === "oura"
-      ? "Oura"
-      : isOpening === "google_fit"
-      ? "Google Fit"
-      : isOpening === "apple_health"
-      ? "Apple Health"
-      : "provider";
+  useEffect(() => {
+    setConnected(hasWearableCookie());
+  }, []);
+
+  const handleConnect = (provider: Provider) => {
+    setLoading(provider);
+    startOAuth(provider);
+  };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button
-          size="lg"
-          className="w-full justify-center gap-2 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 text-sm font-medium text-white shadow-lg shadow-purple-500/40 hover:from-purple-400 hover:via-pink-400 hover:to-blue-400"
-        >
-          <Watch className="h-4 w-4" />
-          Connect your wearable
-        </Button>
-      </DialogTrigger>
-
-      <DialogContent className="max-w-md border border-slate-800 bg-slate-950/90 backdrop-blur-xl">
-        <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-slate-50">
-            Connect your body data
-          </DialogTitle>
-          <DialogDescription className="text-xs text-slate-400">
-            FromWithin translates your heart, breath, and sleep into energy
-            insights. Choose the wearable (or app) you use most.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="mt-4 space-y-3">
-          {PROVIDERS.map((p) => (
-            <button
-              key={p.key}
-              onClick={() => handleConnect(p.key, p.available)}
-              disabled={!p.available}
-              className={`flex w-full items-center justify-between rounded-2xl border px-3 py-3 text-left text-sm transition ${
-                p.available
-                  ? "border-slate-700 bg-slate-900/80 hover:border-purple-500 hover:bg-slate-900"
-                  : "cursor-not-allowed border-slate-800 bg-slate-900/40 opacity-50"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900/80">
-                  {p.icon}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 font-medium text-slate-100">
-                    {p.label}
-                    {!p.available && (
-                      <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-400">
-                        Coming soon
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    {p.description}
-                  </p>
-                </div>
-              </div>
-
-              {p.available && (
-                <span className="text-[11px] uppercase tracking-wide text-purple-300">
-                  Connect
-                </span>
-              )}
-            </button>
-          ))}
+    <div className="w-full rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-4 text-xs text-slate-200 shadow-lg shadow-slate-950/70">
+      {/* Header */}
+      <div className="mb-3 flex items-start gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-400/40 via-violet-400/40 to-sky-400/40 p-[2px] shadow-lg shadow-violet-500/40">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950">
+            <Watch className="h-4 w-4 text-sky-200" />
+          </div>
         </div>
 
-        <p className="mt-4 text-[11px] leading-relaxed text-slate-500">
-          We&apos;ll never share your health data. It&apos;s encrypted and used
-          only to help you understand your nervous system, emotional energy, and
-          daily rhythms.
-        </p>
-
-        {isOpening && (
-          <p className="mt-2 text-[11px] text-slate-400">
-            Opening {openingLabel}…
+        <div className="space-y-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+            Wearable Sync
           </p>
-        )}
-      </DialogContent>
-    </Dialog>
+          <p className="text-xs text-slate-100">
+            {connected
+              ? "Your wearable is linked. We’ll quietly sync sleep, HRV, and steps to refine your rituals each day."
+              : "Connect a wearable once, and FromWithin will flow in your sleep, HRV, and movement so insights feel deeply personal."}
+          </p>
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => handleConnect("oura")}
+          className="inline-flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-1 text-[11px] uppercase tracking-wide text-slate-200 transition hover:border-violet-400/80 hover:text-slate-50"
+        >
+          <Moon className="h-3.5 w-3.5 text-sky-300" />
+          {loading === "oura" ? "Connecting…" : "Connect Oura"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleConnect("fitbit")}
+          className="inline-flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-1 text-[11px] uppercase tracking-wide text-slate-200 transition hover:border-emerald-400/80 hover:text-slate-50"
+        >
+          <Activity className="h-3.5 w-3.5 text-emerald-300" />
+          {loading === "fitbit" ? "Connecting…" : "Connect Fitbit"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleConnect("googlefit")}
+          className="inline-flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-1 text-[11px] uppercase tracking-wide text-slate-200 transition hover:border-rose-400/80 hover:text-slate-50"
+        >
+          <HeartPulse className="h-3.5 w-3.5 text-rose-300" />
+          {loading === "googlefit" ? "Connecting…" : "Connect Google Fit"}
+        </button>
+      </div>
+
+      {/* Footer copy */}
+      <p className="mt-3 text-[10px] leading-relaxed text-slate-500">
+        We only read the metrics you explicitly approve (sleep, HRV, heart rate,
+        steps). Your data never leaves FromWithin and is used solely to help you
+        understand your rhythms and nervous system.
+      </p>
+    </div>
   );
-};
+}
