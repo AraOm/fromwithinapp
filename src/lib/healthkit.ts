@@ -1,42 +1,45 @@
 // src/lib/healthkit.ts
+// Web stub for Apple Health / HealthKit.
+// The real native implementation lives in the iOS app.
+// Here we just provide no-op functions so the web build compiles cleanly.
 
-import Healthkit, {
-    HKQuantityTypeIdentifier,
-    HKCategoryTypeIdentifier,
-  } from "@kingstinct/react-native-healthkit";
-  
-  /**
-   * Ask the user for Apple Health / Apple Watch permissions.
-   * Returns true if sharing is authorized.
-   */
-  export async function requestHealthAuthorization(): Promise<boolean> {
-    const isAvailable = await Healthkit.isHealthDataAvailable();
-  
-    if (!isAvailable) {
-      console.warn("Health data is not available on this device.");
-      return false;
-    }
-  
-    const permissions = {
-      read: [
-        HKQuantityTypeIdentifier.heartRate,
-        HKQuantityTypeIdentifier.heartRateVariabilitySDNN,
-        HKQuantityTypeIdentifier.stepCount,
-        HKQuantityTypeIdentifier.respiratoryRate,
-        HKCategoryTypeIdentifier.sleepAnalysis,
-        HKCategoryTypeIdentifier.mindfulSession
-      ],
-      write: [
-        HKCategoryTypeIdentifier.mindfulSession
-      ]
-    };
-  
-    try {
-      await Healthkit.requestAuthorization(permissions);
-      return true;
-    } catch (error) {
-      console.error("HealthKit authorization error:", error);
-      return false;
-    }
+export type HealthSummary = {
+  steps?: number | null;
+  hrv?: number | null;
+  sleepMinutes?: number | null;
+  restingHeartRate?: number | null;
+};
+
+function logNotAvailable() {
+  if (typeof window !== "undefined") {
+    console.warn(
+      "[HealthKit] Apple Health is only available in the iOS app, not on the web."
+    );
   }
-  
+}
+
+/**
+ * Ask the user for Apple Health / Apple Watch permissions.
+ * Web: no-op, always returns false.
+ */
+export async function requestHealthPermissions(): Promise<boolean> {
+  logNotAvailable();
+  return false;
+}
+
+/**
+ * Get a small summary of recent health metrics.
+ * Web: returns null so callers can handle “no data”.
+ */
+export async function getHealthSummary(): Promise<HealthSummary | null> {
+  logNotAvailable();
+  return null;
+}
+
+/**
+ * Convenience: is HealthKit available on this platform?
+ * Web: always false.
+ */
+export function isHealthKitAvailable(): boolean {
+  return false;
+}

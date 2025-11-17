@@ -1,6 +1,6 @@
 // src/pages/morning.tsx
 "use client";
-import { ConnectWearable } from "@/components/ConnectWearable";
+import ConnectWearable from "@/components/ConnectWearable";
 
 import React, { useMemo, useState, useEffect } from "react";
 import {
