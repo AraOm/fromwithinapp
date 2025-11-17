@@ -34,7 +34,7 @@ export default function HomePage() {
       href: "/insights",
       title: "Insights",
       description: "Trends across body, mood, and moon.",
-      icon: "〰️",
+      icon: "﹏",
     },
     {
       href: "/community",
