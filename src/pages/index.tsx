@@ -28,7 +28,7 @@ export default function HomePage() {
       href: "/guide", // hub for Mentor + Tarot
       title: "Guide",
       description: "Mentor, tarot, and soul-level guidance.",
-      icon: "✨",
+      icon: "🜃",
     },
     {
       href: "/insights",
@@ -46,7 +46,7 @@ export default function HomePage() {
       href: "/studio", // hub for Play + Learning + tools
       title: "Studio",
       description: "Play, learn, and create with energy tools.",
-      icon: "𓀪",
+      icon: "𓁿",
     },
     {
       href: "/beta-feedback",

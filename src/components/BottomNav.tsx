@@ -60,9 +60,9 @@ export default function BottomNav() {
     {
       href: "/community",
       label: "Community",
-      icon: <span aria-hidden>𓀤𓀥</span>,
+      icon: <span aria-hidden>ૐ</span>,
     },
-    { href: "/studio", label: "Studio", icon: <span aria-hidden>ॐ</span> },
+    { href: "/studio", label: "Studio", icon: <span aria-hidden>𓁿</span> },
 
     // ⭐ NEW TILE — Beta Feedback
     {
