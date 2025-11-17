@@ -32,7 +32,7 @@ export default function Welcome() {
             Requires Apple Health, Fitbit, Oura, or Google Fit • 7 days free, then $11.11/month.
           </p>
 
-          {/* NEW: link to pricing structure */}
+          {/* Link to pricing structure */}
           <Link
             href="/pricing"
             className="mt-2 text-xs text-slate-300 underline underline-offset-4 hover:text-slate-100"
@@ -41,11 +41,19 @@ export default function Welcome() {
           </Link>
         </div>
 
-        {/* FOOTER LINKS */}
+        {/* CORRECTED FOOTER LINKS */}
         <div className="mt-10 text-xs text-slate-500">
-          <Link href="/legal/privacy">Privacy</Link> •{" "}
-          <Link href="/legal/terms">Terms</Link> •{" "}
-          <Link href="/legal/medical">Medical</Link>
+          <Link href="/privacy" className="hover:text-slate-300">
+            Privacy
+          </Link>{" "}
+          ·{" "}
+          <Link href="/terms" className="hover:text-slate-300">
+            Terms
+          </Link>{" "}
+          ·{" "}
+          <Link href="" className="hover:text-slate-300">
+            
+          </Link>
         </div>
       </section>
     </main>

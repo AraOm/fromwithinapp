@@ -4,6 +4,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import ConnectWearable from "@/components/ConnectWearable";
+import ZenPlaylists from "@/components/ZenPlaylists";
 
 import {
   Activity,
@@ -667,6 +668,9 @@ export default function TodayEnergyPage() {
             </ul>
           </SectionCard>
         </div>
+
+        {/* Moments of Zen – Spotify Playlists */}
+        <ZenPlaylists />
 
         {/* Quick Links */}
         <section className="mt-4 flex flex-wrap gap-4">

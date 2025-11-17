@@ -8,6 +8,7 @@ import {
   StatusBar,
 } from "react-native";
 import { useFromWithinHealth } from "./hooks/useHealthkit";
+import { LegalLinks } from "./components/LegalLinks"; // ✅ IMPORT ADDED
 
 export default function App() {
   const { authStatus, requestAuthorization, steps, heartRate, hrv, sleep } =
@@ -23,10 +24,11 @@ export default function App() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#020617" }}>
       <StatusBar barStyle="light-content" />
+
       <ScrollView
         contentContainerStyle={{
           padding: 20,
-          paddingBottom: 40,
+          paddingBottom: 60,
         }}
       >
         <Text
@@ -44,6 +46,7 @@ export default function App() {
           HealthKit status: {authStatus ?? "unknown"}
         </Text>
 
+        {/* Re-request permissions button */}
         <TouchableOpacity
           onPress={() => requestAuthorization()}
           style={{
@@ -52,7 +55,7 @@ export default function App() {
             paddingHorizontal: 14,
             borderRadius: 999,
             alignSelf: "flex-start",
-            marginBottom: 20,
+            marginBottom: 24,
           }}
         >
           <Text
@@ -65,6 +68,7 @@ export default function App() {
           </Text>
         </TouchableOpacity>
 
+        {/* Latest data */}
         <Text
           style={{
             color: "white",
@@ -102,7 +106,11 @@ export default function App() {
             ? `${sleep.sample.startDate.toString()} → ${sleep.sample.endDate.toString()}`
             : "no recent sleep sample"}
         </Text>
+
+        {/* ▸▸ NEW: Privacy + Terms Links (bottom of screen) */}
+        <LegalLinks />
       </ScrollView>
     </SafeAreaView>
   );
 }
+

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useLayoutEffect, useRef } from "react";
+import LegalLinks from "./LegalLinks"; // ✅ NEW: tiny Privacy & Terms row
 
 type ItemProps = { href: string; label: string; icon: React.ReactNode };
 
@@ -111,6 +112,9 @@ export default function BottomNav() {
         paddingBottom: "max(env(safe-area-inset-bottom), 0px)",
       }}
     >
+      {/* ✅ Tiny Privacy / Terms row, sits just above the icons */}
+      <LegalLinks />
+
       <div
         className={cx(
           "relative mx-auto max-w-screen-md",
