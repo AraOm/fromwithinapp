@@ -29,7 +29,7 @@ export default function Welcome() {
           </Link>
 
           <p className="text-xs text-slate-500 whitespace-nowrap">
-            Requires Apple Health, Fitbit, Oura, or Google Fit • 7 days free, then $11.11/month.
+            Requires Apple Health, Fitbit, Oura, Garmin or Google Fit • 7 days free, then $11.11/month.
           </p>
 
           {/* Link to pricing structure */}

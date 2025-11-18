@@ -1,97 +1,95 @@
 // src/components/ConnectWearable.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Watch, Activity, HeartPulse, Moon } from "lucide-react";
 
-type Provider = "fitbit" | "oura" | "googlefit";
+type Provider = "fitbit" | "oura" | "googlefit" | "apple" | "garmin";
 
-const COOKIE_KEY = "gw_wearable_connected";
+const PROVIDERS: {
+  id: Provider;
+  label: string;
+  description: string;
+  icon: React.ReactNode;
+}[] = [
+  {
+    id: "fitbit",
+    label: "Fitbit",
+    description: "Steps · Sleep · Heart",
+    icon: <Activity className="h-3.5 w-3.5" />,
+  },
+  {
+    id: "oura",
+    label: "Oura",
+    description: "Sleep · HRV · Readiness",
+    icon: <Moon className="h-3.5 w-3.5" />,
+  },
+  {
+    id: "googlefit",
+    label: "Google Fit",
+    description: "Android steps & heart",
+    icon: <HeartPulse className="h-3.5 w-3.5" />,
+  },
+  {
+    id: "apple",
+    label: "Apple Health",
+    description: "iPhone · Apple Watch",
+    icon: <Watch className="h-3.5 w-3.5" />,
+  },
+  {
+    id: "garmin",
+    label: "Garmin",
+    description: "Outdoor · Performance",
+    icon: <Activity className="h-3.5 w-3.5" />,
+  },
+];
 
-/** Check if any wearable has been connected (cookie set by the OAuth callback) */
-function hasWearableCookie(): boolean {
-  if (typeof document === "undefined") return false;
-  return document.cookie.split("; ").some((c) => c.startsWith(`${COOKIE_KEY}=1`));
-}
-
-/** Send the browser into the OAuth flow for the given provider */
 function startOAuth(provider: Provider) {
-  if (typeof window === "undefined") return;
-  // Full page navigation so the 307 redirect → provider works correctly
+  // Uses your existing API pattern: /api/oauth/{provider}/start
   window.location.href = `/api/oauth/${provider}/start`;
 }
 
 export default function ConnectWearable() {
-  const [connected, setConnected] = useState(false);
-  const [loading, setLoading] = useState<Provider | null>(null);
-
-  useEffect(() => {
-    setConnected(hasWearableCookie());
-  }, []);
-
-  const handleConnect = (provider: Provider) => {
-    setLoading(provider);
-    startOAuth(provider);
-  };
-
   return (
-    <div className="w-full rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-4 text-xs text-slate-200 shadow-lg shadow-slate-950/70">
-      {/* Header */}
-      <div className="mb-3 flex items-start gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-400/40 via-violet-400/40 to-sky-400/40 p-[2px] shadow-lg shadow-violet-500/40">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950">
-            <Watch className="h-4 w-4 text-sky-200" />
+    <section className="w-full rounded-3xl border border-slate-800 bg-slate-950/80 px-4 py-3 shadow-lg shadow-black/40 backdrop-blur">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-900 ring-1 ring-slate-700/80">
+            <Watch className="h-4 w-4 text-slate-100" />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.18em] text-slate-200">
+              CONNECT WEARABLE
+            </p>
+            <p className="text-[10px] text-slate-400">
+              Sync sleep, HRV & movement from your devices.
+            </p>
           </div>
         </div>
-
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-            Wearable Sync
-          </p>
-          <p className="text-xs text-slate-100">
-            {connected
-              ? "Your wearable is linked. We’ll quietly sync sleep, HRV, and steps to refine your rituals each day."
-              : "Connect a wearable once, and FromWithin will flow in your sleep, HRV, and movement so insights feel deeply personal."}
-          </p>
-        </div>
       </div>
 
-      {/* Buttons */}
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => handleConnect("oura")}
-          className="inline-flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-1 text-[11px] uppercase tracking-wide text-slate-200 transition hover:border-violet-400/80 hover:text-slate-50"
-        >
-          <Moon className="h-3.5 w-3.5 text-sky-300" />
-          {loading === "oura" ? "Connecting…" : "Connect Oura"}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleConnect("fitbit")}
-          className="inline-flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-1 text-[11px] uppercase tracking-wide text-slate-200 transition hover:border-emerald-400/80 hover:text-slate-50"
-        >
-          <Activity className="h-3.5 w-3.5 text-emerald-300" />
-          {loading === "fitbit" ? "Connecting…" : "Connect Fitbit"}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleConnect("googlefit")}
-          className="inline-flex items-center gap-1 rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-1 text-[11px] uppercase tracking-wide text-slate-200 transition hover:border-rose-400/80 hover:text-slate-50"
-        >
-          <HeartPulse className="h-3.5 w-3.5 text-rose-300" />
-          {loading === "googlefit" ? "Connecting…" : "Connect Google Fit"}
-        </button>
+      {/* Capsules */}
+      <div className="mt-2 flex flex-wrap gap-2">
+        {PROVIDERS.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => startOAuth(p.id)}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/80 px-3 py-1.5 text-[11px] text-slate-100 shadow-sm shadow-black/30 transition hover:border-violet-500/70 hover:bg-slate-900"
+          >
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-800/90">
+              {p.icon}
+            </span>
+            <span className="font-medium">{p.label}</span>
+            <span className="text-[10px] text-slate-400">· {p.description}</span>
+          </button>
+        ))}
       </div>
 
-      {/* Footer copy */}
-      <p className="mt-3 text-[10px] leading-relaxed text-slate-500">
-        We only read the metrics you explicitly approve (sleep, HRV, heart rate,
-        steps). Your data never leaves FromWithin and is used solely to help you
-        understand your rhythms and nervous system.
+      <p className="mt-2 text-[10px] text-slate-500">
+        Data stays encrypted and private — used only to reflect your energy
+        back to you.
       </p>
-    </div>
+    </section>
   );
 }
