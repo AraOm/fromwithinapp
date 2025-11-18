@@ -114,7 +114,7 @@ export default function HomePage() {
                 </div>
 
                 <p className="relative z-10 px-6 py-10 text-center text-sm font-medium text-slate-50 md:px-10 md:py-14 md:text-lg">
-                  Your home base. Choose the path you&apos;d like to explore.
+                Your inner portal. Follow the path your energy wants to explore.
                 </p>
               </div>
             </div>
