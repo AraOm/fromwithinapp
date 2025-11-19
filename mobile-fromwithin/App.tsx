@@ -8,7 +8,7 @@ import {
   StatusBar,
 } from "react-native";
 import { useFromWithinHealth } from "./hooks/useHealthkit";
-import { LegalLinks } from "./components/LegalLinks"; // ✅ IMPORT ADDED
+import { LegalLinks } from "./components/LegalLinks"; // ✅ IMPORT
 
 export default function App() {
   const { authStatus, requestAuthorization, steps, heartRate, hrv, sleep } =
@@ -107,10 +107,9 @@ export default function App() {
             : "no recent sleep sample"}
         </Text>
 
-        {/* ▸▸ NEW: Privacy + Terms Links (bottom of screen) */}
+        {/* Privacy + Terms links at the bottom */}
         <LegalLinks />
       </ScrollView>
     </SafeAreaView>
   );
 }
-
