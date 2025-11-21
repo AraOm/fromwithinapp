@@ -9,7 +9,6 @@
     },
     "orientation": "portrait",
 
-    /* 👇 This points to your new app icon */
     "icon": "./assets/icon.png",
 
     "splash": {
@@ -17,9 +16,11 @@
       "resizeMode": "contain",
       "backgroundColor": "#020617"
     },
+
     "updates": {
       "fallbackToCacheTimeout": 0
     },
+
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -28,12 +29,10 @@
       "bundleIdentifier": "com.fromwithin.app",
       "supportsTablet": false,
 
-      /* 👇 Turn on HealthKit for this app */
       "entitlements": {
         "com.apple.developer.healthkit": true
       },
 
-      /* 👇 Required texts Apple shows in the Health permission popup */
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSHealthShareUsageDescription": "FromWithin uses your Apple Watch data (HRV, sleep, heart rate, breaths per minute, steps, menstrual cycle) to give you personalized healing and wellness insights.",
@@ -49,7 +48,6 @@
       }
     },
 
-    /* 👇 Keep your HealthKit plugin exactly as you had it */
     "plugins": [
       [
         "@kingstinct/react-native-healthkit",
@@ -64,8 +62,16 @@
     "extra": {
       "eas": {
         "projectId": "9b0527c0-22b7-4cfb-9f08-abe395917ab8"
+      },
+
+      /* ⭐️ Wearable Connect URLs (safe, public, no secrets) */
+      "wearableConnect": {
+        "fitbit": "https://fromwithinapp.com/api/oauth/fitbit/start",
+        "oura": "https://fromwithinapp.com/api/oauth/oura/start",
+        "googlefit": "https://fromwithinapp.com/api/oauth/google/start",
+        "samsung": "https://fromwithinapp.com/api/oauth/samsung/start",
+        "garmin": "https://fromwithinapp.com/api/oauth/garmin/start"
       }
     }
   }
 }
-
