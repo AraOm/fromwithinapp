@@ -54,16 +54,28 @@ async function exchangeGoogle(code: string) {
   return resp.json();
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { code, state } = req.query as { code?: string; state?: string };
-  const { provider } = req.query as { provider: "fitbit" | "oura" | "googlefit" };
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const { code } = req.query as { code?: string };
+  const { provider } = req.query as {
+    provider: "fitbit" | "oura" | "google" | "googlefit" | "samsung";
+  };
 
   if (!code) return res.status(400).send("Missing code");
 
   try {
     if (provider === "fitbit") await exchangeFitbit(code);
     if (provider === "oura") await exchangeOura(code);
-    if (provider === "googlefit") await exchangeGoogle(code);
+    if (provider === "google" || provider === "googlefit")
+      await exchangeGoogle(code);
+
+    // For now we don't have Samsung's real OAuth wired:
+    if (provider === "samsung") {
+      console.log("Samsung callback hit (no token exchange implemented yet)");
+      // you could add future Samsung token exchange logic here
+    }
 
     // Dev: mark wearable connected + pick provider
     res.setHeader("Set-Cookie", [
